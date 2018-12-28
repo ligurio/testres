@@ -1,0 +1,9 @@
+progress: 28704
+time: 2016-07-05 12:17:02.290433Z
+test: bzrlib.doc.api.DocFileTest(/usr/lib64/python2.7/site-packages/bzrlib/doc/api/branch.txt)
+time: 2016-07-05 12:17:02.314892Z
+successful: bzrlib.tests.blackbox.test_add.TestAdd.test_add_from_subdir(view-aware) [ multipart
+]
+skip: bzrlib.tests.test_http.TestBadProtocolServer.test_http_has(pycurl,HTTP/1.1) [
+pycurl doesn't check the protocol version
+]

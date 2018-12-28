@@ -1,0 +1,51 @@
+body {
+    background-color: #f3f2f2;
+    font-size: 11pt;
+    font-family: Verdana, Arial, Helvetica, Sans-Serif;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    text-align: center;
+    vertical-align: middle;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+.td-date {
+    font-weight: 600;
+    font-size: 14pt;
+}
+
+.footer {
+    position: absolute;
+    left: 50%;
+    margin-left: -100px;
+}
+
+.label {
+    font-size: 12pt;
+    padding: 6px;
+    border-radius: 10%;
+    margin-right: 2px;
+}
+
+.passed {background-color: #4CAF50;}	/* green */
+.failed {background-color: #FF0000;}	/* red */
+.skipped {background-color: #6C6C6C;}	/* grey */
+
+input {
+    font-size: 16pt;
+}

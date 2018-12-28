@@ -1,0 +1,130 @@
+.\"	$Id$
+.\"
+.\" Copyright (c) 2018 Sergey Bronnikov
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate: December 28 2018 $
+.Dt TESTRES 1
+.Os
+.Sh NAME
+.Nm testres
+.Nd A hyperfast web frontend for software testing results written in C.
+.Sh SYNOPSIS
+.Nm
+.Op Fl h
+.Op Fl s Ar file
+.Op Fl s Ar directory
+.Op Fl v
+.Sh DESCRIPTION
+The
+.Nm
+utility knits together software testing reports.
+It helps to store and analyze them.
+.Nm
+is able to read software testing reports in three formats: JUnit, SubUnit
+(versions 1 and 2) and Test Anything Protocol.
+It supports two modes: console and Web application.
+.Sh USAGE
+.Bl -tag -width Ds
+.It Pa Console application
+shows a summary of multiple reports in a directory, detailed summary of a
+single report and calculates metrics for each test title: average pass rate,
+average time of test execution, flakiness status and APFD (Average Percentage
+of Faults Detected).
+A higher APFD value indicates faster (or  better) fault detection rate.
+.It Pa Web application
+works as a CGI application.
+Shows index of multiple reports, separate reports and supports searching.
+.El
+.Sh FORMATS
+.Nm
+supports three the most popular software testing report formats: TAP
+(TestAnythingProtocol), SubUnit (version 1 and 2) and JUnit.
+.Bl -tag -width Ds
+.It Pa JUnit "   "
+The JUnit XML Report output comes from a build tool called Nant, as opposed to
+the JUnit project itself - thus it can be a little tricky to nail down an
+official spec for the format, even though it's widely adopted and used.
+There have been a number of attempts to codify the schema, first off there is
+an XSD for JUnit. Files with JUnit reports must have .xml extension.
+.It Pa Test Anything Protocol
+is a simple text-based interface between testing modules a test harness.
+Files with TAP reports must have .tap extension.
+.It Pa SubUnit
+is a streaming protocol for test results.
+It allows communication between unit tests and a test harness.
+Originally developed for unit testing in 2005 by Robert Collins.
+There are two major revisions of the protocol.
+Version 1 was trivially human readable but had significant defects.
+Version 1.1 added encapsulation of binary streams which mitigated some of the
+issues but the core remained.
+Version 2 shares many of the good characteristics of Version 1 and it still
+models xUnit style test execution.
+Files with SubUnit reports must have .subunit extension.
+.El
+.Sh FILES
+.Bl -tag -width "/var/www/conf/testres.css" -compact
+.It Pa /var/www/conf/testres.css
+CSS style sheet.
+.It Pa /var/www/conf/favicon.ico
+favicon.
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh EXAMPLES
+.Bd -literal
+
+TEST REPORT (SUBUNIT_V1)
+ID: b09b24ebda9e4725552bf89f9afdd9d04ab1cab
+CREATED ON: Thu Jan  1 03:00:00 1970
+FILE: web/subunit_v1.subunit
+
+SUITE: noname
+        PASS test_add.TestAdd.test_add_control_dir(pre-views)
+        PASS test_add.TestAdd.test_add_control_dir(view-aware)
+        PASS test_add.TestAdd.test_add_dry_run(pre-views)
+        PASS test_add.TestAdd.test_add_dry_run(view-aware)
+
+.Ed
+.Sh STANDARDS
+.Rs
+.%A M. G. Schwern, A. Lester, A. Armstrong
+.%D 2003-2007
+.%T TAP 13 - The Test Anything Protocol v13
+.Re
+.Pp
+.Rs
+.%A R. Collins
+.%D August 2009
+.%T SubUnit: A streaming protocol for test results
+.Re
+.Pp
+.Rs
+.%A D. Robinson, K. Coar
+.%D October 2004
+.%R RFC 3875
+.%T The Common Gateway Interface (CGI) Version 1.1
+.Re
+.Sh AUTHORS
+.An -nosplit
+The
+.Nm
+utility was written by
+.An Sergey Bronnikov
+.Sh CAVEATS
+Supported formats uses different names and types of test statuses.
+For simplification
+.Nm
+number of statuses limited by PASS, FAIL and SKIP in report summary. These
+statuses aggregates other appropriate types of statuses in supported formats.

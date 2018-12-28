@@ -1,0 +1,6 @@
+³+S@}[}<iî+ýøtest1stdin@^#!/usr/bin/python3.6
+
+import codecs
+
+print(codecs.decode("0x3666F6F", "hex").decode('utf-8'))
+ŠG
