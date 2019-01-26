@@ -17,10 +17,10 @@ notify me by e-mail.
 - evaluating of current test coverage
 - evaluating of tests stability and effectiveness
 - evaluating of features stability in a project
-- estimation of test convergence
+- estimating of testing convergence
 - reducing [Mean Time to Diagnosis](https://www.joecolantonio.com/alan-page-principles-lessons-learned-at-microsoft/)
 - conversion of binary test reports to a textual form for indexing, see [swish-e](http://www.esa.org/tiee/search/html/swish-config.html#document_filter_directives)
-- test selection, [see](http://www.iosrjournals.org/iosr-jce/papers/Vol16-issue4/Version-1/G016414751.pdf)
+- calculating of testcase metrics (Average Time Execution, Average Percentage of Fault Detected (APFD) and [more](http://www.iosrjournals.org/iosr-jce/papers/Vol16-issue4/Version-1/G016414751.pdf))
 
 ### Usage
 
