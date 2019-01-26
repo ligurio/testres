@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Sergey Bronnikov
+ * Copyright © 2018-2019 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include <dirent.h>
+#include <stdlib.h>
 #include <math.h>
 
 #include "parse_common.h"
@@ -373,4 +374,45 @@ struct reportq *process_dir(char *path) {
 	closedir(d);
 
 	return reports;
+}
+
+struct test_metrics *calc_test_metrics(struct reportq *reports, char *name) {
+   int num = 0;			/* total number of executions */
+   int fail_num = 0;	/* number of failed executions */
+   double time = 0;		/* duration of all executions */
+   struct test_metrics *metrics;
+   metrics = malloc(sizeof(struct test_metrics));
+   if (metrics == NULL) {
+      fprintf(stderr, "malloc()");
+      return 0;
+   }
+   metrics->avg_time = 0.0;
+   metrics->apfd = 0;
+
+   tailq_report *report_item = NULL;
+   TAILQ_FOREACH(report_item, reports, entries) {
+      if (report_item->suites != NULL) {
+         tailq_suite *suite_item = NULL;
+         TAILQ_FOREACH(suite_item, report_item->suites, entries) {
+            if (!TAILQ_EMPTY(suite_item->tests)) {
+               tailq_test *test_item = NULL;
+               TAILQ_FOREACH(test_item, suite_item->tests, entries) {
+                  if (strcmp(test_item->name, name) == 0) {
+					 time += atof(test_item->time);
+					 num++;
+					 if (class_by_status(test_item->status) == STATUS_CLASS_FAIL) {
+						fail_num++;
+					 }
+			      }
+               }
+            }
+         }
+      }
+   }
+   if (num != 0) {
+      metrics->avg_time = time / num;
+      metrics->apfd = (int)(100 * fail_num / num);
+   }
+
+   return metrics;
 }

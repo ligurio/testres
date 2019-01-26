@@ -1,6 +1,6 @@
 .\"	$Id$
 .\"
-.\" Copyright (c) 2018 Sergey Bronnikov
+.\" Copyright (c) 2018-2019 Sergey Bronnikov
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd $Mdocdate: December 28 2018 $
+.Dd $Mdocdate: January 26 2019 $
 .Dt TESTRES 1
 .Os
 .Sh NAME
@@ -25,6 +25,7 @@
 .Op Fl h
 .Op Fl s Ar file
 .Op Fl s Ar directory
+.Op Fl t Ar name
 .Op Fl v
 .Sh DESCRIPTION
 The
@@ -32,20 +33,37 @@ The
 utility knits together software testing reports.
 It helps to store and analyze them.
 .Nm
-is able to read software testing reports in three formats: JUnit, SubUnit
+is able to process software testing reports in a three formats: JUnit, SubUnit
 (versions 1 and 2) and Test Anything Protocol.
-It supports two modes: console and Web application.
+.Pp
+The options are as follows:
+.Bl -tag
+.It Fl s
+Set a source of reports.
+Can be a regular file or multiple files in a directory.
+.It Fl t
+Set a testcase name and output metrics for a specified testcase name.
+.It Fl v
+Print version.
+.El
+.Pp
+It supports two modes: console and web application.
 .Sh USAGE
 .Bl -tag -width Ds
 .It Pa Console application
-shows a summary of multiple reports in a directory, detailed summary of a
-single report and calculates metrics for each test title: average pass rate,
-average time of test execution, flakiness status and APFD (Average Percentage
-of Faults Detected).
+by default prints summary when specified directory with multiple reports and
+detailed information in case of file with a single report.
+When testcase name is specified
+.Nm
+calculates and prints useful metrics: average time of test execution and APFD
+(Average Percentage of Faults Detected).
+APFD measures the weighted average of the percentage of faults detected over
+the life of a test suite.
+APFD values ranges from 0 to 100, higher number simply faster fault detection rates.
 A higher APFD value indicates faster (or  better) fault detection rate.
 .It Pa Web application
 works as a CGI application.
-Shows index of multiple reports, separate reports and supports searching.
+Allows to show a list with latest reports and detailed information of a separate report.
 .El
 .Sh FORMATS
 .Nm
@@ -85,6 +103,19 @@ favicon.
 .Sh EXAMPLES
 .Bd -literal
 
+$ testres -s reports/
+-------------------------------------------------------------
+DATE            PASS  FAIL  SKIP FILE
+-------------------------------------------------------------
+10/30/18 23:40     3     4     0 /home/sergeyb/testres/db/junit-min.xml
+10/30/18 23:40  1760   689     0 /home/sergeyb/testres/db/junit.xml
+10/30/18 23:40     1     0     1 /home/sergeyb/testres/db/subunit_v1-min.subunit
+10/30/18 23:40 20358    57  2533 /home/sergeyb/testres/db/subunit_v1.subunit
+10/30/18 23:40     1     2     1 /home/sergeyb/testres/db/testanything-min.tap
+10/30/18 23:40     6     0     0 /home/sergeyb/testres/db/testanything.tap
+
+$ testres -s web/subunit_v1.subunit
+
 TEST REPORT (SUBUNIT_V1)
 ID: b09b24ebda9e4725552bf89f9afdd9d04ab1cab
 CREATED ON: Thu Jan  1 03:00:00 1970
@@ -95,6 +126,12 @@ SUITE: noname
         PASS test_add.TestAdd.test_add_control_dir(view-aware)
         PASS test_add.TestAdd.test_add_dry_run(pre-views)
         PASS test_add.TestAdd.test_add_dry_run(view-aware)
+
+$ testres -s reports/ -t "(teardown)"
+Tescase Name: (teardown)
+Average Percentage of Fault Detected (APFD): 35%
+Average Execution Time: 0.002904
+$
 
 .Ed
 .Sh STANDARDS

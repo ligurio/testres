@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Sergey Bronnikov
+ * Copyright © 2018-2019 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,13 +46,14 @@ void
 usage(char *path)
 {
 	char *name = basename(path);
-	fprintf(stderr, "Usage: %s [-s file | directory] [-h|-v]\n", name);
+	fprintf(stderr, "Usage: %s [-s file | directory] [-t name] [-h|-v]\n", name);
 }
 
 int
 main(int argc, char *argv[])
 {
 	char *path = (char *) NULL;
+	char *name = (char *) NULL;
 	const char *stylesheet = "/testres.css";
 	int opt = 0;
 
@@ -64,7 +65,7 @@ main(int argc, char *argv[])
 #endif /* __OpenBSD__ */
 
 	snprintf(version, sizeof(version), "%s %s", __DATE__, __TIME__);
-	while ((opt = getopt(argc, argv, "vhs:")) != -1) {
+	while ((opt = getopt(argc, argv, "vhs:t:")) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
@@ -74,6 +75,9 @@ main(int argc, char *argv[])
 			return 0;
 		case 's':
 			path = realpath(optarg, path);
+			break;
+		case 't':
+			name = optarg;
 			break;
 		default:	/* '?' */
 			usage(argv[0]);
@@ -115,6 +119,17 @@ main(int argc, char *argv[])
 
 	struct reportq *reports;
 	reports = process_dir(path);
+	if (name != NULL) {
+	   struct test_metrics *metrics;
+	   metrics = calc_test_metrics(reports, name);
+	   printf("Tescase Name: %s\n", name);
+	   printf("Average Percentage of Fault Detected (APFD): %d%%\n", metrics->apfd);
+	   printf("Average Execution Time: %f\n", metrics->avg_time);
+	   free(metrics);
+	   free_reports(reports);
+	   return 0;
+	}
+
 	if (query_string == NULL) {
 	   print_reports(reports);
 	   free_reports(reports);

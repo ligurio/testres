@@ -117,6 +117,11 @@ typedef struct tailq_test tailq_test;
 typedef struct tailq_suite tailq_suite;
 typedef struct tailq_report tailq_report;
 
+struct test_metrics {
+    double avg_time;	/* seconds */
+    int apfd;			/* percents */
+};
+
 char *get_filename_ext(const char *filename);
 enum test_format detect_format(char *path);
 struct reportq *process_dir(char *path);
@@ -133,6 +138,7 @@ struct reportq *sort_reports(struct reportq *reports);
 int num_by_status_class(struct tailq_report *report, enum test_status_class c);
 enum test_status_class class_by_status(enum test_status status);
 double calc_success_perc(struct tailq_report *report);
+struct test_metrics *calc_test_metrics(struct reportq *reports, char *name);
 
 /* cleanup */
 void free_reports(struct reportq *reports);
