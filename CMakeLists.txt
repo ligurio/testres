@@ -6,7 +6,7 @@ parse_junit.c
 parse_subunit_v1.c
 parse_subunit_v2.c
 parse_testanything.c
-tf-idf.c
+diff.c
 ui_common.c
 ui_console.c
 ui_http.c
