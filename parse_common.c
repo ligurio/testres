@@ -387,7 +387,7 @@ struct test_metrics *calc_test_metrics(struct reportq *reports, char *name) {
       return 0;
    }
    metrics->avg_time = 0.0;
-   metrics->apfd = 0;
+   metrics->avg_faults = 0;
 
    tailq_report *report_item = NULL;
    TAILQ_FOREACH(report_item, reports, entries) {
@@ -411,7 +411,7 @@ struct test_metrics *calc_test_metrics(struct reportq *reports, char *name) {
    }
    if (num != 0) {
       metrics->avg_time = time / num;
-      metrics->apfd = (int)(100 * fail_num / num);
+      metrics->avg_faults = (int)(100 * fail_num / num);
    }
 
    return metrics;

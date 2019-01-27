@@ -119,7 +119,7 @@ typedef struct tailq_report tailq_report;
 
 struct test_metrics {
     double avg_time;	/* seconds */
-    int apfd;			/* percents */
+    int avg_faults;		/* percents */
 };
 
 char *get_filename_ext(const char *filename);

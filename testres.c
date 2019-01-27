@@ -123,7 +123,7 @@ main(int argc, char *argv[])
 	   struct test_metrics *metrics;
 	   metrics = calc_test_metrics(reports, name);
 	   printf("Tescase Name: %s\n", name);
-	   printf("Average Percentage of Fault Detected (APFD): %d%%\n", metrics->apfd);
+	   printf("Average Percentage of Fault Detected (APFD): %d%%\n", metrics->avg_faults);
 	   printf("Average Execution Time: %f\n", metrics->avg_time);
 	   free(metrics);
 	   free_reports(reports);
