@@ -27,6 +27,7 @@
 .Op Fl s Ar directory
 .Op Fl t Ar name
 .Op Fl v
+.Op Fl h
 .Sh DESCRIPTION
 The
 .Nm
@@ -45,6 +46,8 @@ Can be a regular file or multiple files in a directory.
 Set a testcase name and output metrics for a specified testcase name.
 .It Fl v
 Print version.
+.It Fl h
+Print usage.
 .El
 .Pp
 It supports two modes: console and web application.
@@ -163,5 +166,5 @@ utility was written by
 Supported formats uses different names and types of test statuses.
 For simplification
 .Nm
-number of statuses limited by PASS, FAIL and SKIP in report summary. These
+limits range of statuses by PASS, FAIL and SKIP only in report summary. These
 statuses aggregates other appropriate types of statuses in supported formats.
