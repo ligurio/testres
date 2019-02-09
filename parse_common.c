@@ -205,7 +205,7 @@ process_file(char *path)
 		break;
 	case FORMAT_UNKNOWN:
 		report->format = FORMAT_UNKNOWN;
-		break;
+		return report;
 	}
 	fclose(file);
 
@@ -220,6 +220,13 @@ process_file(char *path)
 
 	report->id = calloc(length, sizeof(unsigned char*));
 	digest_to_str(report->id, digest, length);
+
+	struct stat sb;
+	if (stat(path, &sb) == -1) {
+		perror("cannot open specified path");
+		return NULL;
+	}
+	report->time = sb.st_mtime;
 
 	return report;
 }
@@ -353,6 +360,9 @@ struct reportq *process_dir(char *path) {
 		/* TODO: recursive search in directories */
 		int path_len = strlen(path) + strlen(basename) + 2;
 		path_file = calloc(path_len, sizeof(char));
+		if (path_file == NULL) {
+			return NULL;
+		}
 		snprintf(path_file, path_len, "%s/%s", path, basename);
 
 		struct stat path_st;
@@ -365,9 +375,8 @@ struct reportq *process_dir(char *path) {
 		}
 		report_item = process_file(path_file);
 		if (report_item->format != FORMAT_UNKNOWN) {
-		   report_item->ctime = path_st.st_ctime;
 		   TAILQ_INSERT_TAIL(reports, report_item, entries);
-           	}
+        }
 		free(path_file);
 	}
 	close(fd);

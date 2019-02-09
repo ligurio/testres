@@ -105,7 +105,7 @@ TAILQ_HEAD(suiteq, tailq_suite);
 struct tailq_report {
     enum test_format format;
     struct suiteq *suites;
-    time_t ctime;
+    time_t time;
     unsigned char *id;
     unsigned char *path;
     TAILQ_ENTRY(tailq_report) entries;

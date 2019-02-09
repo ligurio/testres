@@ -42,9 +42,9 @@ tr:nth-child(even) {
     margin-right: 2px;
 }
 
-.passed {background-color: #4CAF50;}	/* green */
-.failed {background-color: #FF0000;}	/* red */
-.skipped {background-color: #6C6C6C;}	/* grey */
+.pass {background-color: #4CAF50;}	/* green */
+.fail {background-color: #FF0000;}	/* red */
+.skip {background-color: #6C6C6C;}	/* grey */
 
 input {
     font-size: 16pt;

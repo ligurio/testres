@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Sergey Bronnikov
+ * Copyright © 2018-2019 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,35 +78,37 @@ print_html_reports(struct reportq * reports) {
     printf("<th>Report ID</th>\n");
     printf("<th>Success %%</th>\n");
     printf("<th>Status</th>\n");
-    printf("<th>Created On</th>\n");
+    /*printf("<th>Created On</th>\n");*/
     printf("</tr>\n");
     tailq_report *report_item = NULL;
-    char datestr[64], datestr_prev[64];
+	time_t prev_time = {0};
+    char datestr[128];
     TAILQ_FOREACH(report_item, reports, entries) {
-        struct tm *date = localtime(&report_item->ctime);
-        strftime(datestr, 64, "%B %d, %Y", date);
-        if (strcmp(datestr, datestr_prev) != 0) {
-           printf("<tr><td class=\"td-date\" colspan=\"4\">%s</td></tr>\n", datestr);
-           strcpy(datestr_prev, datestr);
-        }
-	    printf("<tr>\n");
-	    /* FIXME */
-	    printf("<td><a href=\"/testres.cgi?show=%s\">%s</a></td>\n", report_item->id, report_item->id);
+	    printf("<td><a href=\"/testres.cgi?show=%s\">%s</a></td>\n",
+					report_item->id, report_item->id);
 	    double perc = calc_success_perc(report_item);
 	    if (perc >= 50) {
-	       printf("<td><span class=\"label passed\">%0.0f</span></td>\n", perc);
+	       printf("<td><span class=\"label pass\">%0.0f</span></td>\n", perc);
 	    } else {
-	       printf("<td><span class=\"label failed\">%0.0f</span></td>\n", perc);
+	       printf("<td><span class=\"label fail\">%0.0f</span></td>\n", perc);
 	    }
 	    printf("<td>\n");
-	    printf("<span class=\"label passed\">%d</span>\n",
+	    printf("<span class=\"label pass\">%d</span>\n",
 			num_by_status_class(report_item, STATUS_CLASS_PASS));
-	    printf("<span class=\"label failed\">%d</span>\n",
+	    printf("<span class=\"label fail\">%d</span>\n",
 			num_by_status_class(report_item, STATUS_CLASS_FAIL));
-	    printf("<span class=\"label skipped\">%d</span>\n",
+	    printf("<span class=\"label skip\">%d</span>\n",
 			num_by_status_class(report_item, STATUS_CLASS_SKIP));
 	    printf("</td>\n");
-        strftime(datestr, 64, "%I:%M%p", date);
+
+        struct tm *date = localtime(&report_item->time);
+		double diff = difftime(report_item->time, prev_time);
+		if (diff > 60*60*24) {
+		   strftime(datestr, 128, "%b %d %H:%M", date);
+        } else {
+		   strftime(datestr, 128, "%H:%M", date);
+		}
+        prev_time = report_item->time;
 	    printf("<td>%s</td>\n", datestr);
 	    printf("</tr>\n");
     }
@@ -117,8 +119,7 @@ void
 print_html_report(struct tailq_report * report) {
     print_html_search();
     char buffer[80] = "";
-    struct tm *info = localtime(&report->ctime);
-    strftime(buffer, 80, "%x - %I:%M%p", info);
+    strftime(buffer, sizeof(buffer), "%b %d %H:%M", localtime(&report->time));
     printf("<table>\n");
     printf("<tr><td><b>Report ID:</b></td><td>%s</td></tr>\n", report->id);
     printf("<tr><td><b>Created On:</b></td><td>%s</td></tr>\n", buffer);
@@ -141,21 +142,21 @@ print_html_suites(struct suiteq * suites) {
     printf("<th>Time</th>\n");
     printf("</tr>\n");
     TAILQ_FOREACH(suite_item, suites, entries) {
-	printf("<tr>\n");
-	const char *name = NULL;
-	if (suite_item->name == (char *) NULL) {
-		name = suite_item->name;
-	} else {
-		name = "Unknown name";
-	}
-	printf("<td>%s</td>\n", name);
-	printf("<td>%s</td>\n", "FIXME");
-	printf("<td>%s</td>\n", suite_item->timestamp);
-	printf("<td>%f</td>\n", suite_item->time);
-	printf("</tr>\n");
-	if (!TAILQ_EMPTY(suite_item->tests)) {
-		print_html_tests(suite_item->tests);
-	}
+		printf("<tr>\n");
+		const char *name = NULL;
+		if (suite_item->name == (char *) NULL) {
+			name = suite_item->name;
+		} else {
+			name = "Unknown name";
+		}
+		printf("<td>%s</td>\n", name);
+		printf("<td>%s</td>\n", "FIXME");
+		printf("<td>%s</td>\n", suite_item->timestamp);
+		printf("<td>%f</td>\n", suite_item->time);
+		printf("</tr>\n");
+		if (!TAILQ_EMPTY(suite_item->tests)) {
+			print_html_tests(suite_item->tests);
+		}
     }
     printf("</table>\n");
 }
