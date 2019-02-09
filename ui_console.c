@@ -108,20 +108,3 @@ print_tests(struct testq * tests)
 		printf("%s\n", test_item->name);
 	}
 }
-
-void
-print_report_prof(struct tailq_report * report)
-{
-	if (!TAILQ_EMPTY(report->suites)) {
-	   tailq_suite *suite_item = NULL;
-	   TAILQ_FOREACH(suite_item, report->suites, entries) {
-	      if (!TAILQ_EMPTY(suite_item->tests)) {
-	         tailq_test *test_item = NULL;
-	         TAILQ_FOREACH(test_item, suite_item->tests, entries) {
-	            printf("%s;", test_item->name);
-	         }
-	         printf(" 1\n");
-	      }
-	   }
-	}
-}
