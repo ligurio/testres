@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Sergey Bronnikov
+ * Copyright © 2019 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,23 @@
  *
  */
 
-#ifndef UI_HTTP_H
-#define UI_HTTP_H
+#ifndef TESTRES_H
+#define TESTRES_H
 
-void print_html_headers();
-void print_html_footer();
-void print_html_reports(struct reportq * reports);
-void print_html_report(struct tailq_report *report);
-void print_html_suites(struct suiteq * suites);
-void print_html_tests(struct testq * tests);
-void print_html_env();
+#define	SCRIPT_NAME "testres.cgi"
+#define	STYLESHEET "testres.css"
+#define	VERSION "0.1.0"
 
-void print_plot_aggregated(struct reportq *reports);
+enum mode { TEXT_MODE, HTTP_MODE };
+enum source { SQLITE, DIRECTORY, SINGLE };
 
-#endif				/* UI_HTTP_H */
+struct config {
+	enum mode mode;
+	enum source source;
+	char *cgi_action;
+	char *cgi_args;
+};
+
+typedef struct config config;
+
+#endif				/* TESTRES_H */

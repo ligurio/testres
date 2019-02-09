@@ -41,6 +41,8 @@
 #include <sys/types.h>
 #include <sys/queue.h>
 
+#include "testres.h"
+
 enum test_format {
 	FORMAT_UNKNOWN,
 	FORMAT_TAP13,
@@ -124,11 +126,14 @@ struct test_metrics {
 
 char *get_filename_ext(const char *filename);
 enum test_format detect_format(char *path);
+int check_sqlite(char *path);
+struct reportq *process_db(char *path);
 struct reportq *process_dir(char *path);
 tailq_report *process_file(char *path);
 tailq_test *make_test(char *name, char *time, char *comment);
 unsigned char *digest_to_str(unsigned char *str, unsigned char digest[], unsigned int n);
 struct tailq_report *is_report_exists(struct reportq *reports, const char* report_id);
+int cgi_parse(char *query_string, struct config *conf);
 
 /*
 static int cmp_date(const void *p1, const void *p2);
@@ -139,6 +144,7 @@ int num_by_status_class(struct tailq_report *report, enum test_status_class c);
 enum test_status_class class_by_status(enum test_status status);
 double calc_success_perc(struct tailq_report *report);
 struct test_metrics *calc_test_metrics(struct reportq *reports, char *name);
+struct reportq *filter_reports(struct reportq *reports, const char *qsearch);
 
 /* cleanup */
 void free_reports(struct reportq *reports);

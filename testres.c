@@ -37,10 +37,9 @@
 #include <sys/stat.h>
 
 #include "parse_common.h"
+#include "testres.h"
 #include "ui_console.h"
 #include "ui_http.h"
-
-char version[1024];
 
 void
 usage(char *path)
@@ -54,7 +53,6 @@ main(int argc, char *argv[])
 {
 	char *path = (char *) NULL;
 	char *name = (char *) NULL;
-	const char *stylesheet = "/testres.css";
 	int opt = 0;
 
 #ifdef __OpenBSD__
@@ -64,14 +62,13 @@ main(int argc, char *argv[])
 	}
 #endif /* __OpenBSD__ */
 
-	snprintf(version, sizeof(version), "%s %s", __DATE__, __TIME__);
 	while ((opt = getopt(argc, argv, "vhs:t:")) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
 			return 0;
 		case 'v':
-			printf("Build-date: %s\n", version);
+			printf("%s\n", VERSION);
 			return 0;
 		case 's':
 			path = realpath(optarg, path);
@@ -90,74 +87,115 @@ main(int argc, char *argv[])
 		return 1;
 	}
 
-	if (path == (char*)NULL) {
-		fprintf(stderr, "specified path is empty");
-		return 1;
-	}
-
 	struct stat path_st;
 	if (stat(path, &path_st) == -1) {
 	   fprintf(stderr, "cannot open specified path");
+	   perror("stat:");
 	   return 1;
 	}
 
+	config *conf;
+	conf = calloc(1, sizeof(config));
+	if (conf == NULL) {
+		perror("calloc:");
+		return 1;
+	}
+
 	char *query_string = getenv("QUERY_STRING");
-	tailq_report *report_item;
-	if (S_ISREG(path_st.st_mode)) {
-	   report_item = process_file(path);
-	   if (query_string != NULL) {
-	      print_html_headers(version, stylesheet);
-	      print_html_report(report_item);
-	      print_html_footer(version);
-	   } else {
-	      /* print_report_prof(report_item); */
-	      print_report(report_item);
- 	   }
-	   free_report(report_item);
-	   return 0;
+	if (query_string != NULL) {
+		conf->mode = HTTP_MODE;
+		if (cgi_parse(query_string, conf) == 1) {
+			print_html_headers();
+			printf("wrong request\n");
+			print_html_footer();
+			return 1;
+		}
+	} else {
+		conf->mode = TEXT_MODE;
 	}
 
 	struct reportq *reports;
-	reports = process_dir(path);
-	if (name != NULL) {
-	   struct test_metrics *metrics;
-	   metrics = calc_test_metrics(reports, name);
-	   printf("Tescase Name: %s\n", name);
-	   printf("Average Percentage of Fault Detected (APFD): %d%%\n", metrics->avg_faults);
-	   printf("Average Execution Time: %f\n", metrics->avg_time);
-	   free(metrics);
-	   free_reports(reports);
-	   return 0;
+	struct tailq_report *report;
+	if (S_ISREG(path_st.st_mode)) {
+		if (name != NULL) {
+			fprintf(stderr, "testcase metrics not supported for single report\n");
+			return 1;
+		}
+		if (check_sqlite(path) == 0) {
+			conf->source = SQLITE;
+			reports = process_db(path);
+		} else {
+			conf->source = SINGLE;
+			report = process_file(path);
+		}
+	} else if (S_ISDIR(path_st.st_mode)) {
+		conf->source = DIRECTORY;
+		reports = process_dir(path);
+	} else {
+		fprintf(stderr, "unsupported source type");
+		return 1;
 	}
 
-	if (query_string == NULL) {
-	   print_reports(reports);
-	   free_reports(reports);
-	   return 0;
+	if (conf->mode == HTTP_MODE) {
+		if (strcmp(conf->cgi_action, "index") == 0) {
+			print_html_headers();
+			print_html_reports(reports);
+			print_html_footer();
+			free_reports(reports);
+			return 0;
+		} else if (strcmp(conf->cgi_action, "show") == 0) {
+			if ((report = is_report_exists(reports, conf->cgi_args)) != NULL) {
+				print_html_headers();
+				print_html_report(report);
+				print_html_footer();
+			} else {
+				print_html_headers();
+				printf("report not found\n");
+				print_html_footer();
+			}
+			free_report(report);
+			return 0;
+		} else if (strcmp(conf->cgi_action, "q") == 0) {
+			struct reportq *filtered = NULL;
+			filtered = filter_reports(reports, conf->cgi_args);
+			print_html_headers();
+			print_html_reports(filtered);
+			print_html_footer();
+			free_reports(reports);
+			free_reports(filtered);
+			return 0;
+		} else {
+			print_html_headers();
+			printf("unknown action\n");
+			print_html_footer();
+		}
 	}
 
-	if (strcmp(query_string, "index") == 0) {
-	   print_html_headers(version, stylesheet);
-	   print_html_reports(reports);
-	   print_html_footer(version);
-	   free_reports(reports);
-	   return 0;
+	if (conf->mode == TEXT_MODE) {
+		if (conf->source == DIRECTORY) {
+			if (name != NULL) {
+				struct test_metrics *metrics;
+				metrics = calc_test_metrics(reports, name);
+				printf("Tescase Name: %s\n", name);
+				printf("Average Percentage of Fault Detected (APFD): %d%%\n",
+						metrics->avg_faults);
+				printf("Average Execution Time: %f\n", metrics->avg_time);
+				free(metrics);
+				free_reports(reports);
+				return 0;
+			}
+			print_reports(reports);
+			free_reports(reports);
+			return 0;
+		} else if (conf->source == SINGLE) {
+			print_report(report);
+			free_report(report);
+			return 0;
+		} else {
+			fprintf(stderr, "unknown source");
+			return 1;
+		}
 	}
 
-	if (strcmp(strtok(query_string, "="), "show") == 0) {
-	   const char *report_id = strtok(NULL, "=");
-	   struct tailq_report *report;
-	   if ((report = is_report_exists(reports, report_id)) != NULL) {
-	      print_html_headers(version, stylesheet);
-	      print_html_report(report);
-	      print_html_footer(version);
-	      free_report(report);
-	      free_reports(reports);
-	   } else {
-	      print_html_headers(version, stylesheet);
-	      printf("not found\n");
-	      print_html_footer(version);
-	   }
-	}
 	return 0;
 }

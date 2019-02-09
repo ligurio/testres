@@ -27,8 +27,8 @@
  */
 
 #include <dirent.h>
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "parse_common.h"
 #include "parse_junit.h"
@@ -36,8 +36,9 @@
 #include "parse_subunit_v2.h"
 #include "parse_testanything.h"
 #include "sha1.h"
+#include "testres.h"
 
-void 
+void
 free_reports(struct reportq * reports)
 {
 	tailq_report *report_item = NULL;
@@ -329,7 +330,8 @@ double calc_success_perc(struct tailq_report *report) {
     return round(num);
 }
 
-struct reportq *process_dir(char *path) {
+struct reportq*
+process_dir(char *path) {
 
 	DIR *d;
 	int fd;
@@ -385,6 +387,21 @@ struct reportq *process_dir(char *path) {
 	return reports;
 }
 
+struct reportq*
+process_db(char *path)
+{
+	/* not implemented */
+	return NULL;
+}
+
+int
+check_sqlite(char *path)
+{
+	/* not implemented */
+	/* see https://www.sqlite.org/fileformat.html */
+	return 1;
+}
+
 struct test_metrics *calc_test_metrics(struct reportq *reports, char *name) {
    int num = 0;			/* total number of executions */
    int fail_num = 0;	/* number of failed executions */
@@ -425,3 +442,53 @@ struct test_metrics *calc_test_metrics(struct reportq *reports, char *name) {
 
    return metrics;
 }
+
+struct reportq *filter_reports(struct reportq *reports, const char *qsearch) {
+
+	if (qsearch == NULL || reports == NULL) {
+		return NULL;
+	}
+
+	struct reportq *filtered;
+	filtered = calloc(1, sizeof(struct reportq));
+	if (filtered == NULL) {
+		return NULL;
+	}
+	TAILQ_INIT(filtered);
+
+	tailq_report *report_item = NULL;
+	TAILQ_FOREACH(report_item, reports, entries) {
+		if (report_item->suites != NULL) {
+			tailq_suite *suite_item = NULL;
+			int matched = 0;
+			TAILQ_FOREACH(suite_item, report_item->suites, entries) {
+				if (matched == 1) {
+					break;
+				}
+				if (!TAILQ_EMPTY(suite_item->tests)) {
+					tailq_test *test_item = NULL;
+					TAILQ_FOREACH(test_item, suite_item->tests, entries) {
+						if (strstr(test_item->name, qsearch) != NULL) {
+							TAILQ_INSERT_TAIL(filtered, report_item, entries);
+							matched = 1;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return reports;
+}
+
+int cgi_parse(char *query_string, struct config *conf) {
+	conf->cgi_action = strtok(query_string, "=");
+	conf->cgi_args = strtok(NULL, "=");
+	if (conf->cgi_action == NULL) {
+		return 1;
+	}
+
+	return 0;
+}
+
