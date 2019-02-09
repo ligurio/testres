@@ -126,6 +126,9 @@ print_html_report(struct tailq_report * report) {
     printf("<tr><td><b>Report ID:</b></td><td>%s</td></tr>\n", report->id);
     printf("<tr><td><b>Created On:</b></td><td>%s</td></tr>\n", buffer);
     printf("<tr><td><b>Format:</b></td><td>%s</td></tr>\n", format_string(report->format));
+    printf("<tr><td><b>Success Rate:</b></td><td>%0.0f%%</td></tr>\n", calc_success_perc(report));
+    printf("<tr><td><b>Slowest Testcase:</b></td><td>%s</td></tr>\n", slowest_testcase(report));
+    printf("<tr><td><b>Total Time:</b></td><td>%f</td></tr>\n", report_total_time(report));
     printf("</table>\n");
     printf("<br>\n");	/* FIXME */
     if (!TAILQ_EMPTY(report->suites)) {

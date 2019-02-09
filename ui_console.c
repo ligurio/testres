@@ -39,6 +39,10 @@ print_report(struct tailq_report *report)
 	strftime(buffer, sizeof(buffer), "%b %d %H:%M", localtime(&report->time));
 	printf("CREATED ON: %s\n", buffer);
 	printf("FILE: %s\n", report->path);
+    printf("SUCCESS RATE: %0.0f%%\n", calc_success_perc(report));
+    printf("SLOWEST TESTCASE: %s\n", slowest_testcase(report));
+    printf("TOTAL TIME: %f\n", report_total_time(report));
+
 	if (!TAILQ_EMPTY(report->suites)) {
 		print_suites(report->suites);
 	} else {

@@ -492,3 +492,41 @@ int cgi_parse(char *query_string, struct config *conf) {
 	return 0;
 }
 
+char *slowest_testcase(struct tailq_report *report) {
+
+	char *slowest;
+	double time = 0;
+	tailq_suite *suite_item = NULL;
+	TAILQ_FOREACH(suite_item, report->suites, entries) {
+		if (!TAILQ_EMPTY(suite_item->tests)) {
+			tailq_test *test_item = NULL;
+			TAILQ_FOREACH(test_item, suite_item->tests, entries) {
+				if (class_by_status(test_item->status) == STATUS_CLASS_FAIL) {
+					double t = atof(test_item->time);
+					if (t > time) {
+						time = t;
+						slowest = test_item->name;
+					}
+				}
+			}
+		}
+	}
+
+	return slowest;
+}
+
+double report_total_time(struct tailq_report *report) {
+
+	double time = 0;
+	tailq_suite *suite_item = NULL;
+	TAILQ_FOREACH(suite_item, report->suites, entries) {
+		if (!TAILQ_EMPTY(suite_item->tests)) {
+			tailq_test *test_item = NULL;
+			TAILQ_FOREACH(test_item, suite_item->tests, entries) {
+				time += atof(test_item->time);
+			}
+		}
+	}
+
+	return time;
+}

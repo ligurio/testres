@@ -134,6 +134,8 @@ tailq_test *make_test(char *name, char *time, char *comment);
 unsigned char *digest_to_str(unsigned char *str, unsigned char digest[], unsigned int n);
 struct tailq_report *is_report_exists(struct reportq *reports, const char* report_id);
 int cgi_parse(char *query_string, struct config *conf);
+char *slowest_testcase(struct tailq_report *report);
+double report_total_time(struct tailq_report *report);
 
 /*
 static int cmp_date(const void *p1, const void *p2);
