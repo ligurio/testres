@@ -494,7 +494,7 @@ int cgi_parse(char *query_string, struct config *conf) {
 
 char *slowest_testcase(struct tailq_report *report) {
 
-	char *slowest;
+	char *slowest = NULL;
 	double time = 0;
 	tailq_suite *suite_item = NULL;
 	TAILQ_FOREACH(suite_item, report->suites, entries) {
@@ -503,7 +503,7 @@ char *slowest_testcase(struct tailq_report *report) {
 			TAILQ_FOREACH(test_item, suite_item->tests, entries) {
 				if (class_by_status(test_item->status) == STATUS_CLASS_FAIL) {
 					double t = atof(test_item->time);
-					if (t > time) {
+					if ((t > time) && (t > SLOWEST_THRESHOLD)) {
 						time = t;
 						slowest = test_item->name;
 					}

@@ -32,6 +32,7 @@
 #define	SCRIPT_NAME "testres.cgi"
 #define	STYLESHEET "testres.css"
 #define	VERSION "0.1.0"
+#define	SLOWEST_THRESHOLD 5
 
 enum mode { TEXT_MODE, HTTP_MODE };
 enum source { SQLITE, DIRECTORY, SINGLE };

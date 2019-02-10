@@ -127,7 +127,8 @@ print_html_report(struct tailq_report * report) {
     printf("<tr><td><b>Created On:</b></td><td>%s</td></tr>\n", buffer);
     printf("<tr><td><b>Format:</b></td><td>%s</td></tr>\n", format_string(report->format));
     printf("<tr><td><b>Success Rate:</b></td><td>%0.0f%%</td></tr>\n", calc_success_perc(report));
-    printf("<tr><td><b>Slowest Testcase:</b></td><td>%s</td></tr>\n", slowest_testcase(report));
+    printf("<tr><td><b>Slowest Testcase: (> %dsec)</b></td><td>%s</td></tr>\n",
+			SLOWEST_THRESHOLD, slowest_testcase(report));
     printf("<tr><td><b>Total Time:</b></td><td>%f</td></tr>\n", report_total_time(report));
     printf("</table>\n");
     printf("<br>\n");	/* FIXME */
@@ -141,24 +142,12 @@ print_html_suites(struct suiteq * suites) {
     tailq_suite *suite_item = NULL;
     printf("<table>\n");
     printf("<tr>\n");
-    printf("<th>Suite Name</th>\n");
+    printf("<th>Testcase</th>\n");
     printf("<th>Status</th>\n");
     printf("<th>Time Duration</th>\n");
     printf("<th>Time</th>\n");
     printf("</tr>\n");
     TAILQ_FOREACH(suite_item, suites, entries) {
-		printf("<tr>\n");
-		const char *name = NULL;
-		if (suite_item->name == (char *) NULL) {
-			name = suite_item->name;
-		} else {
-			name = "Unknown name";
-		}
-		printf("<td>%s</td>\n", name);
-		printf("<td>%s</td>\n", "FIXME");
-		printf("<td>%s</td>\n", suite_item->timestamp);
-		printf("<td>%f</td>\n", suite_item->time);
-		printf("</tr>\n");
 		if (!TAILQ_EMPTY(suite_item->tests)) {
 			print_html_tests(suite_item->tests);
 		}
@@ -180,9 +169,9 @@ print_html_tests(struct testq * tests) {
 	}
 	printf("<td>%s</td>\n", name);
 	printf("<td>%s</td>\n", format_status(test_item->status));
-	printf("<td></td>\n");	/* FIXME */
 	format_sec(atof(test_item->time), buf);
 	printf("<td>%s</td>\n", buf);
+	printf("<td></td>\n");
 	printf("</tr>\n");
     }
 }
