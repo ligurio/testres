@@ -19,7 +19,7 @@ notify me by e-mail.
 - evaluating of features stability in a project
 - estimating of testing convergence
 - reducing [Mean Time to Diagnosis](https://www.joecolantonio.com/alan-page-principles-lessons-learned-at-microsoft/)
-- conversion of binary test reports to a textual form for indexing, see [swish-e](http://www.esa.org/tiee/search/html/swish-config.html#document_filter_directives)
+- conversion of binary test reports to a textual form for indexing, see [Swish-e](http://www.esa.org/tiee/search/html/swish-config.html#document_filter_directives)
 - calculating of testcase metrics (Average Time Execution, Average Percentage of Fault Detected (APFD) and [more](http://www.iosrjournals.org/iosr-jce/papers/Vol16-issue4/Version-1/G016414751.pdf))
 
 ### Usage
