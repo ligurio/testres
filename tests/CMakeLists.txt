@@ -1,13 +1,17 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
-SET(CMAKE_VERBOSE_MAKEFILE ON)
+cmake_minimum_required (VERSION 3.10)
 
-PROJECT("runtests")
+set(CMAKE_C_FLAGS "-std=c99 -O0 -Wall -Wextra -Wimplicit")
 
-SET(CMAKE_C_FLAGS "-std=c99 -O0 -Wall -Wextra -Wimplicit")
+include(FindEXPAT)
+find_package(EXPAT REQUIRED)
 
-INCLUDE_DIRECTORIES("/usr/local/include")
-LINK_DIRECTORIES("/usr/local/lib/")
-ADD_EXECUTABLE(runtests testres_tests.c)
-TARGET_LINK_LIBRARIES(runtests cunit)
-
-ADD_CUSTOM_TARGET(unit-test COMMAND ${PROJECT_NAME})
+include_directories(${${PROJECT_NAME}_SOURCE_DIR}/src
+					${EXPAT_INCLUDE_DIRS}
+					"/usr/local/include")
+link_directories("/usr/local/lib/")
+add_executable(${PROJECT_NAME}-tests testres_tests.c)
+target_link_libraries(${PROJECT_NAME}-tests
+					${EXPAT_LIBRARIES}
+					${PROJECT_NAME}-lib
+					cunit
+					m)

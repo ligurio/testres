@@ -505,7 +505,7 @@ char *slowest_testcase(struct tailq_report *report) {
 					double t = atof(test_item->time);
 					if ((t > time) && (t > SLOWEST_THRESHOLD)) {
 						time = t;
-						slowest = test_item->name;
+						slowest = (char*)test_item->name;
 					}
 				}
 			}
