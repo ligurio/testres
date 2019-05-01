@@ -122,14 +122,14 @@ main(int argc, char *argv[])
 			return 1;
 		}
 		if (check_sqlite(path) == 0) {
-			conf->source = SQLITE;
+			conf->source = SOURCE_SQLITE;
 			reports = process_db(path);
 		} else {
-			conf->source = SINGLE;
+			conf->source = SOURCE_FILE;
 			report = process_file(path);
 		}
 	} else if (S_ISDIR(path_st.st_mode)) {
-		conf->source = DIRECTORY;
+		conf->source = SOURCE_DIR;
 		reports = process_dir(path);
 	} else {
 		fprintf(stderr, "unsupported source type");
@@ -172,7 +172,7 @@ main(int argc, char *argv[])
 	}
 
 	if (conf->mode == TEXT_MODE) {
-		if (conf->source == DIRECTORY) {
+		if (conf->source == SOURCE_DIR) {
 			if (name != NULL) {
 				struct test_metrics *metrics;
 				metrics = calc_test_metrics(reports, name);
@@ -187,7 +187,7 @@ main(int argc, char *argv[])
 			print_reports(reports);
 			free_reports(reports);
 			return 0;
-		} else if (conf->source == SINGLE) {
+		} else if (conf->source == SOURCE_FILE) {
 			print_report(report);
 			free_report(report);
 			return 0;
