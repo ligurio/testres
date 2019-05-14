@@ -308,7 +308,7 @@ enum test_status_class class_by_status(enum test_status status) {
    case STATUS_INPROGRESS:
      return STATUS_CLASS_SKIP;
    default:
-     break;
+     return STATUS_CLASS_SKIP;
    }
 }
 
