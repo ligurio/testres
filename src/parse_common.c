@@ -483,6 +483,10 @@ struct reportq *filter_reports(struct reportq *reports, const char *qsearch) {
 }
 
 int cgi_parse(char *query_string, struct config *conf) {
+	if (query_string == NULL) {
+		conf->cgi_action = (char*)"/";
+		return 0;
+        }
 	conf->cgi_action = strtok(query_string, "=");
 	conf->cgi_args = strtok(NULL, "=");
 	if (conf->cgi_action == NULL) {

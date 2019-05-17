@@ -101,17 +101,20 @@ main(int argc, char *argv[])
 		return 1;
 	}
 
-	char *query_string = getenv("QUERY_STRING");
-	if (query_string != NULL) {
+	if (isatty(fileno(stdin)) == 0) {
 		conf->mode = HTTP_MODE;
+	} else {
+		conf->mode = TEXT_MODE;
+	}
+
+	char *query_string = getenv("QUERY_STRING");
+	if (conf->mode == HTTP_MODE) {
 		if (cgi_parse(query_string, conf) == 1) {
 			print_html_headers();
-			printf("wrong request\n");
+			printf("wrong a http request: %s\n", query_string);
 			print_html_footer();
 			return 1;
 		}
-	} else {
-		conf->mode = TEXT_MODE;
 	}
 
 	struct reportq *reports;
@@ -137,7 +140,7 @@ main(int argc, char *argv[])
 	}
 
 	if (conf->mode == HTTP_MODE) {
-		if (strcmp(conf->cgi_action, "index") == 0) {
+		if (strcmp(conf->cgi_action, "/") == 0) {
 			print_html_headers();
 			print_html_reports(reports);
 			print_html_footer();
