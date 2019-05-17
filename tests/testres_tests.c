@@ -11,19 +11,17 @@
 #include "parse_subunit_v2.h"
 #include "sha1.h"
 
-#define SAMPLE_FILE_JUNIT "../samples/junit.xml"
-#define SAMPLE_FILE_SUBUNIT_V1 "../samples/subunit_v1.subunit"
-#define SAMPLE_FILE_SUBUNIT_V2 "../samples/subunit_v2.subunit"
-#define SAMPLE_FILE_TESTANYTHING "../samples/testanything.tap"
+#define SAMPLE_FILE_JUNIT "samples/junit.xml"
+#define SAMPLE_FILE_SUBUNIT_V1 "samples/subunit_v1.subunit"
+#define SAMPLE_FILE_SUBUNIT_V2 "samples/subunit_v2.subunit"
+#define SAMPLE_FILE_TESTANYTHING "samples/testanything.tap"
 
 static void test_parse_testanything()
 {
     char *name = SAMPLE_FILE_TESTANYTHING;
     FILE *file;
     file = fopen(name, "r");
-    if (file == NULL) {
-       CU_get_error();
-    }
+    CU_ASSERT_NOT_EQUAL_FATAL(file, NULL);
     parse_testanything(file);
     fclose(file);
 }
@@ -36,7 +34,7 @@ static void test_parse_subunit_v2_packet()
     // b3 2901 0c 03666f6f 08555f1b
     // echo 03666f6f | xxd -p -r
 
-    CU_PASS("TODO");
+    CU_FAIL_FATAL("not implemented");
 
     subunit_header sample_header = { .signature = 0xb3, .flags = ntohs(0x2901) };
     uint16_t sample_length = 0x0c;
@@ -72,16 +70,14 @@ static void test_is_subunit_v2()
 
 static void test_parse_subunit_v2()
 {
-    CU_PASS("TODO");
+    CU_FAIL_FATAL("not implemented");
 
     char *name = SAMPLE_FILE_SUBUNIT_V2;
     FILE *file;
 
     file = fopen(name, "r");
-    if (file == NULL)
-    {
-        CU_get_error();
-    }
+    CU_ASSERT_NOT_EQUAL_FATAL(file, NULL);
+
     struct suiteq *suites;
     suites = parse_subunit_v2(file);
     fclose(file);
@@ -94,10 +90,8 @@ static void test_parse_subunit_v1()
     FILE *file;
 
     file = fopen(name, "r");
-    if (file == NULL)
-    {
-        CU_get_error();
-    }
+    CU_ASSERT_NOT_EQUAL_FATAL(file, NULL);
+
     struct suiteq *suites;
     suites = parse_subunit_v1(file);
 
@@ -152,11 +146,7 @@ static void test_parse_junit()
     char *name = SAMPLE_FILE_JUNIT;
 
     file = fopen(name, "r");
-    if (file == NULL)
-    {
-        CU_get_error();
-    }
-
+    CU_ASSERT_NOT_EQUAL_FATAL(file, NULL);
     parse_junit(file);
     fclose(file);
 }
@@ -260,15 +250,15 @@ int main()
    }
 
    /* add the tests to the suite */
-   if ((NULL == CU_add_test(pSuite, "test of fprintf()", test_parse_junit)) ||
-       (NULL == CU_add_test(pSuite, "test of fread()", test_parse_subunit_v1)) ||
-       (NULL == CU_add_test(pSuite, "test of fread()", test_parse_subunit_v1_line)) ||
-       (NULL == CU_add_test(pSuite, "test of fread()", test_parse_subunit_v2)) ||
-       (NULL == CU_add_test(pSuite, "test of fread()", test_parse_subunit_v2_packet)) ||
-       (NULL == CU_add_test(pSuite, "test of fread()", test_is_subunit_v2)) ||
-       (NULL == CU_add_test(pSuite, "test of fread()", test_parse_testanything)) ||
-       (NULL == CU_add_test(pSuite, "test of fread()", test_cmp)) ||
-       (NULL == CU_add_test(pSuite, "test of fread()", test_sha1)))
+   if ((NULL == CU_add_test(pSuite, "test_parse_junit()", test_parse_junit)) ||
+       (NULL == CU_add_test(pSuite, "test_parse_subunit_v1()", test_parse_subunit_v1)) ||
+       (NULL == CU_add_test(pSuite, "test_parse_subunit_v1_line()", test_parse_subunit_v1_line)) ||
+       (NULL == CU_add_test(pSuite, "test_parse_subunit_v2()", test_parse_subunit_v2)) ||
+       (NULL == CU_add_test(pSuite, "test_parse_subunit_v2_packet()", test_parse_subunit_v2_packet)) ||
+       (NULL == CU_add_test(pSuite, "test_is_subunit_v2()", test_is_subunit_v2)) ||
+       (NULL == CU_add_test(pSuite, "test_parse_testanything()", test_parse_testanything)) ||
+       (NULL == CU_add_test(pSuite, "test_cmp()", test_cmp)) ||
+       (NULL == CU_add_test(pSuite, "test_sha1()", test_sha1)))
    {
       CU_cleanup_registry();
       return CU_get_error();
