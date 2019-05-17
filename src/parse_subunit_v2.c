@@ -132,7 +132,7 @@ parse_subunit_v2(FILE * stream)
 	TAILQ_INIT(suite_item->tests);
 	tailq_test *test_item = NULL;
 
-	test_item = read_packet(stream);
+	test_item = read_subunit_v2_packet(stream);
 	if (test_item != NULL)
 		TAILQ_INSERT_TAIL(suite_item->tests, test_item, entries);
 
@@ -163,7 +163,7 @@ parse_subunit_v2(FILE * stream)
 }
 
 tailq_test *
-read_packet(FILE * stream)
+read_subunit_v2_packet(FILE * stream)
 {
 	subunit_header header;
 	int n_bytes = 0;

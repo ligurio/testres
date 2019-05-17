@@ -26,7 +26,7 @@ static void test_parse_testanything()
     fclose(file);
 }
 
-static void test_parse_subunit_v2_packet()
+static void test_read_subunit_v2_packet()
 {
     // Packet sample, with test id, runnable set, status=enumeration.
     // Spaces below are to visually break up:
@@ -50,7 +50,7 @@ static void test_parse_subunit_v2_packet()
     fwrite(&sample_testid, 1, sizeof(sample_testid), stream);
     fwrite(&sample_crc32, 1, sizeof(sample_crc32), stream);
 
-    test = read_packet(stream);
+    test = read_subunit_v2_packet(stream);
     fclose(stream);
 
     CU_ASSERT_STRING_EQUAL(test->name, "");
@@ -254,7 +254,7 @@ int main()
        (NULL == CU_add_test(pSuite, "test_parse_subunit_v1()", test_parse_subunit_v1)) ||
        (NULL == CU_add_test(pSuite, "test_parse_subunit_v1_line()", test_parse_subunit_v1_line)) ||
        (NULL == CU_add_test(pSuite, "test_parse_subunit_v2()", test_parse_subunit_v2)) ||
-       (NULL == CU_add_test(pSuite, "test_parse_subunit_v2_packet()", test_parse_subunit_v2_packet)) ||
+       (NULL == CU_add_test(pSuite, "test_read_subunit_v2_packet()", test_read_subunit_v2_packet)) ||
        (NULL == CU_add_test(pSuite, "test_is_subunit_v2()", test_is_subunit_v2)) ||
        (NULL == CU_add_test(pSuite, "test_parse_testanything()", test_parse_testanything)) ||
        (NULL == CU_add_test(pSuite, "test_cmp()", test_cmp)) ||

@@ -56,7 +56,7 @@ typedef struct subunit_header subunit_header;
 typedef uint32_t timestamp;
 
 uint32_t read_field(FILE *stream);
-tailq_test *read_packet(FILE *stream);
+tailq_test *read_subunit_v2_packet(FILE *stream);
 struct suiteq *parse_subunit_v2(FILE *stream);
 int is_subunit_v2(char* path);
 
