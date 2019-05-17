@@ -29,7 +29,7 @@ $ mkdir build
 $ cd build
 $ cmake .. -DCMAKE_BUILD_TYPE=RELEASE
 $ cmake .. -DCMAKE_BUILD_TYPE=DEBUG
-$ make
+$ make test
 $ bin/testres -s samples/junit.xml
 ```
 
