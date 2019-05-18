@@ -37,6 +37,6 @@ void print_html_suites(struct suiteq * suites);
 void print_html_tests(struct testq * tests);
 void print_html_env();
 
-void print_plot_aggregated(struct reportq *reports);
+void print_plot(struct reportq *reports);
 
 #endif				/* UI_HTTP_H */
