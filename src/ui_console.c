@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Sergey Bronnikov
+ * Copyright © 2018-2019 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
  *
  */
 
+#include "metrics.h"
 #include "parse_common.h"
 #include "ui_console.h"
 #include "ui_common.h"

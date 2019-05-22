@@ -36,6 +36,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include "metrics.h"
 #include "parse_common.h"
 #include "testres.h"
 #include "ui_console.h"

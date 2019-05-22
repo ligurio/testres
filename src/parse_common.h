@@ -119,10 +119,15 @@ typedef struct tailq_test tailq_test;
 typedef struct tailq_suite tailq_suite;
 typedef struct tailq_report tailq_report;
 
-struct test_metrics {
-    double avg_time;	/* seconds */
-    int avg_faults;		/* percents */
-};
+/* cleanup */
+void free_reports(struct reportq *reports);
+void free_suites(struct suiteq *suites);
+void free_tests(struct testq *tests);
+
+void free_report(tailq_report * report);
+void free_suite(tailq_suite * suite);
+void free_test(tailq_test * test);
+
 
 char *get_filename_ext(const char *filename);
 enum test_format detect_format(char *path);
@@ -134,8 +139,6 @@ tailq_test *make_test(char *name, char *time, char *comment);
 unsigned char *digest_to_str(unsigned char *str, unsigned char digest[], unsigned int n);
 struct tailq_report *is_report_exists(struct reportq *reports, const char* report_id);
 int cgi_parse(char *query_string, struct config *conf);
-char *slowest_testcase(struct tailq_report *report);
-double report_total_time(struct tailq_report *report);
 
 /*
 static int cmp_date(const void *p1, const void *p2);
@@ -144,17 +147,6 @@ struct reportq *sort_reports(struct reportq *reports);
 
 int num_by_status_class(struct tailq_report *report, enum test_status_class c);
 enum test_status_class class_by_status(enum test_status status);
-double calc_success_perc(struct tailq_report *report);
-struct test_metrics *calc_test_metrics(struct reportq *reports, char *name);
 struct reportq *filter_reports(struct reportq *reports, const char *qsearch);
-
-/* cleanup */
-void free_reports(struct reportq *reports);
-void free_suites(struct suiteq *suites);
-void free_tests(struct testq *tests);
-
-void free_report(tailq_report * report);
-void free_suite(tailq_suite * suite);
-void free_test(tailq_test * test);
 
 #endif				/* PARSE_COMMON_H */

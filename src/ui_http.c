@@ -31,6 +31,7 @@
 
 #include <sys/types.h>
 
+#include "metrics.h"
 #include "parse_common.h"
 #include "testres.h"
 #include "ui_common.h"
