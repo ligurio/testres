@@ -16,3 +16,5 @@ target_link_libraries(${PROJECT_NAME}-tests
 					expat
 					cunit
 					m)
+
+add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME}-tests WORKING_DIRECTORY tests/)

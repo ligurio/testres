@@ -178,13 +178,10 @@ main(int argc, char *argv[])
 	if (conf->mode == TEXT_MODE) {
 		if (conf->source == SOURCE_DIR) {
 			if (name != NULL) {
-				struct test_metrics *metrics;
-				metrics = calc_test_metrics(reports, name);
 				printf("Tescase Name: %s\n", name);
 				printf("Average Percentage of Fault Detected (APFD): %d%%\n",
-						metrics->avg_faults);
-				printf("Average Execution Time: %f\n", metrics->avg_time);
-				free(metrics);
+						metric_apfd(reports, name));
+				printf("Average Execution Time: %f\n", metric_tc_avg_time(reports, name));
 				free_reports(reports);
 				return 0;
 			}

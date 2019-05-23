@@ -31,7 +31,7 @@
 #include "metrics.h"
 
 /* FIXME: passed, failed and skipped calculated twice */
-double calc_success_perc(struct tailq_report *report) {
+double metric_pass_rate(struct tailq_report *report) {
     double num = 0;
     if (report->suites != NULL) {
        int passed = num_by_status_class(report, STATUS_CLASS_PASS);
@@ -45,18 +45,9 @@ double calc_success_perc(struct tailq_report *report) {
     return round(num);
 }
 
-struct test_metrics *calc_test_metrics(struct reportq *reports, char *name) {
-   int num = 0;			/* total number of executions */
-   int fail_num = 0;	/* number of failed executions */
-   double time = 0;		/* duration of all executions */
-   struct test_metrics *metrics;
-   metrics = malloc(sizeof(struct test_metrics));
-   if (metrics == NULL) {
-      fprintf(stderr, "malloc()");
-      return 0;
-   }
-   metrics->avg_time = 0.0;
-   metrics->avg_faults = 0;
+double metric_tc_avg_time(struct reportq *reports, char *tc_name) {
+   int total_num = 0;
+   double total_time = 0;
 
    tailq_report *report_item = NULL;
    TAILQ_FOREACH(report_item, reports, entries) {
@@ -66,11 +57,42 @@ struct test_metrics *calc_test_metrics(struct reportq *reports, char *name) {
             if (!TAILQ_EMPTY(suite_item->tests)) {
                tailq_test *test_item = NULL;
                TAILQ_FOREACH(test_item, suite_item->tests, entries) {
-                  if (strcmp(test_item->name, name) == 0) {
-					 time += atof(test_item->time);
-					 num++;
+                  if (strcmp(test_item->name, tc_name) == 0) {
+			total_time += atof(test_item->time);
+			total_num++;
+		  }
+               }
+            }
+         }
+      }
+   }
+
+   if (total_num != 0) {
+      return total_time / total_num;
+   }
+
+   return 0;
+}
+
+/*  rate of fault detection per percentage of test suite execution */
+int metric_apfd(struct reportq *reports, char *tc_name) {
+   int total_num = 0;
+   int failed_num = 0;
+   double total_time = 0;
+
+   tailq_report *report_item = NULL;
+   TAILQ_FOREACH(report_item, reports, entries) {
+      if (report_item->suites != NULL) {
+         tailq_suite *suite_item = NULL;
+         TAILQ_FOREACH(suite_item, report_item->suites, entries) {
+            if (!TAILQ_EMPTY(suite_item->tests)) {
+               tailq_test *test_item = NULL;
+               TAILQ_FOREACH(test_item, suite_item->tests, entries) {
+                  if (strcmp(test_item->name, tc_name) == 0) {
+					 total_time += atof(test_item->time);
+					 total_num++;
 					 if (class_by_status(test_item->status) == STATUS_CLASS_FAIL) {
-						fail_num++;
+						failed_num++;
 					 }
 			      }
                }
@@ -78,15 +100,14 @@ struct test_metrics *calc_test_metrics(struct reportq *reports, char *name) {
          }
       }
    }
-   if (num != 0) {
-      metrics->avg_time = time / num;
-      metrics->avg_faults = (int)(100 * fail_num / num);
+   if (total_num != 0) {
+      return (int)(100 * failed_num / total_num);
    }
 
-   return metrics;
+   return 0;
 }
 
-char *slowest_testcase(struct tailq_report *report) {
+char *metric_slowest_testcase(struct tailq_report *report) {
 
 	char *slowest = NULL;
 	double time = 0;
@@ -109,7 +130,7 @@ char *slowest_testcase(struct tailq_report *report) {
 	return slowest;
 }
 
-double report_total_time(struct tailq_report *report) {
+double metric_total_time(struct tailq_report *report) {
 
 	double time = 0;
 	tailq_suite *suite_item = NULL;

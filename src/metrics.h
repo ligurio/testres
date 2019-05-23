@@ -31,14 +31,10 @@
 
 #include "parse_common.h"
 
-struct test_metrics {
-    double avg_time;	/* seconds */
-    int avg_faults;		/* percents */
-};
-
-double report_total_time(struct tailq_report *report);
-double calc_success_perc(struct tailq_report *report);
-struct test_metrics *calc_test_metrics(struct reportq *reports, char *name);
-char *slowest_testcase(struct tailq_report *report);
+int metric_apfd(struct reportq *reports, char *tc_name);
+double metric_tc_avg_time(struct reportq *reports, char *tc_name);
+double metric_total_time(struct tailq_report *report);
+double metric_pass_rate(struct tailq_report *report);
+char *metric_slowest_testcase(struct tailq_report *report);
 
 #endif				/* METRICS_H */
