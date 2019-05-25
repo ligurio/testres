@@ -32,6 +32,10 @@
 
 /* FIXME: passed, failed and skipped calculated twice */
 double metric_pass_rate(struct tailq_report *report) {
+
+    if (!report)
+      return 0;
+
     double num = 0;
     if (report->suites != NULL) {
        int passed = num_by_status_class(report, STATUS_CLASS_PASS);
@@ -76,6 +80,7 @@ double metric_tc_avg_time(struct reportq *reports, char *tc_name) {
 
 /*  rate of fault detection per percentage of test suite execution */
 int metric_apfd(struct reportq *reports, char *tc_name) {
+
    int total_num = 0;
    int failed_num = 0;
    double total_time = 0;
@@ -109,6 +114,9 @@ int metric_apfd(struct reportq *reports, char *tc_name) {
 
 char *metric_slowest_testcase(struct tailq_report *report) {
 
+	if (!report)
+	  return NULL;
+
 	char *slowest = NULL;
 	double time = 0;
 	tailq_suite *suite_item = NULL;
@@ -116,7 +124,8 @@ char *metric_slowest_testcase(struct tailq_report *report) {
 		if (!TAILQ_EMPTY(suite_item->tests)) {
 			tailq_test *test_item = NULL;
 			TAILQ_FOREACH(test_item, suite_item->tests, entries) {
-				if (class_by_status(test_item->status) == STATUS_CLASS_FAIL) {
+				if ((class_by_status(test_item->status) == STATUS_CLASS_FAIL) &&
+					(test_item->time)) {
 					double t = atof(test_item->time);
 					if ((t > time) && (t > SLOWEST_THRESHOLD)) {
 						time = t;
@@ -132,13 +141,17 @@ char *metric_slowest_testcase(struct tailq_report *report) {
 
 double metric_total_time(struct tailq_report *report) {
 
+	if (!report)
+	  return 0;
+
 	double time = 0;
 	tailq_suite *suite_item = NULL;
 	TAILQ_FOREACH(suite_item, report->suites, entries) {
 		if (!TAILQ_EMPTY(suite_item->tests)) {
 			tailq_test *test_item = NULL;
 			TAILQ_FOREACH(test_item, suite_item->tests, entries) {
-				time += atof(test_item->time);
+				if (test_item->time)
+				  time += atof(test_item->time);
 			}
 		}
 	}
