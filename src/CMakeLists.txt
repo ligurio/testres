@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 set(BIN_SOURCES
 testres.c
-diff.c
 metrics.c
 ui_common.c
 ui_console.c

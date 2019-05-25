@@ -182,58 +182,6 @@ static void test_sha1()
     free(str);
 }
 
-static void test_cmp()
-{
-    struct {
-          char *word1;
-          char *word2;
-          int distance;
-      } tests[] = {
-          /* It should work. */
-          { "", "a", 1 },
-          { "a", "", 1 },
-          { "", "", 0 },
-          { "levenshtein", "levenshtein", 0 },
-          { "sitting", "kitten", 3 },
-          { "gumbo", "gambol", 2 },
-          { "saturday", "sunday", 3 },
-
-          /* It should match case sensitive. */
-          { "DwAyNE", "DUANE", 2 },
-          { "dwayne", "DuAnE", 5 },
-
-          /* It not care about parameter ordering. */
-          { "aarrgh", "aargh", 1 },
-          { "aargh", "aarrgh", 1 },
-
-          /* Some tests form `hiddentao/fast-levenshtein`. */
-          { "a", "b", 1 },
-          { "ab", "ac", 1 },
-          { "ac", "bc", 1 },
-          { "abc", "axc", 1 },
-          { "xabxcdxxefxgx", "1ab2cd34ef5g6", 6 },
-          { "xabxcdxxefxgx", "abcdefg", 6 },
-          { "javawasneat", "scalaisgreat", 7 },
-          { "example", "samples", 3 },
-          { "sturgeon", "urgently", 6 },
-          { "levenshtein", "frankenstein", 6 },
-          { "distance", "difference", 5 },
-          { NULL, NULL, 0 },
-    };
-
-    const char *word1;
-    const char *word2;
-
-    int i, d;
-    for (i = 0; tests[i].word1 != NULL; i++) {
-         /* printf("===> '%s' and '%s'\n", tests[i].word1, tests[i].word2); */
-         word1 = tests[i].word1;
-         word2 = tests[i].word2;
-         /* d = distance(word1, strlen(word1), word2, strlen(word2)); */
-         /* CU_ASSERT(d == tests[i].distance); */
-    }
-}
-
 int main()
 {
    CU_pSuite pSuite = NULL;
@@ -257,7 +205,6 @@ int main()
        (NULL == CU_add_test(pSuite, "test_read_subunit_v2_packet()", test_read_subunit_v2_packet)) ||
        (NULL == CU_add_test(pSuite, "test_is_subunit_v2()", test_is_subunit_v2)) ||
        (NULL == CU_add_test(pSuite, "test_parse_testanything()", test_parse_testanything)) ||
-       (NULL == CU_add_test(pSuite, "test_cmp()", test_cmp)) ||
        (NULL == CU_add_test(pSuite, "test_sha1()", test_sha1)))
    {
       CU_cleanup_registry();
