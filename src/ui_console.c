@@ -32,23 +32,24 @@
 #include "ui_common.h"
 
 void
-print_report(struct tailq_report *report)
-{
-	printf("\nTEST REPORT (%s)\n", format_string(report->format));
-	printf("ID: %s\n", report->id);
-	char buffer[80] = "";
-	strftime(buffer, sizeof(buffer), "%b %d %H:%M", localtime(&report->time));
-	printf("CREATED ON: %s\n", buffer);
-	printf("FILE: %s\n", report->path);
-    printf("SUCCESS RATE: %0.0f%%\n", metric_pass_rate(report));
-    printf("SLOWEST TESTCASE: %s\n", metric_slowest_testcase(report));
-    printf("TOTAL TIME: %f\n", metric_total_time(report));
-
-	if (!TAILQ_EMPTY(report->suites)) {
-		print_suites(report->suites);
-	} else {
-		printf("None suites.\n");
-	}
+print_report(struct tailq_report *report) {
+    if (!TAILQ_EMPTY(report->suites)) {
+    	print_suites(report->suites);
+    } else {
+    	printf("None suites.\n");
+    }
+    
+    printf("\n--------------------------------------------------------------------------------\n");
+    int passed_tests, failed_tests, skipped_tests;
+    passed_tests = num_by_status_class(report, STATUS_CLASS_PASS);
+    failed_tests = num_by_status_class(report, STATUS_CLASS_FAIL);
+    skipped_tests = num_by_status_class(report, STATUS_CLASS_SKIP);
+    printf("\n%0.0f%% tests passed, %d tests failed out of %d\n",
+				metric_pass_rate(report),
+				failed_tests + skipped_tests,
+				passed_tests + failed_tests + skipped_tests);
+    printf("\nSlowest Testcase (>%d sec): %s", SLOWEST_THRESHOLD, metric_slowest_testcase(report));
+    printf("\nTotal Test time =  %10.2f sec\n", metric_total_time(report));
 }
 
 void
@@ -82,15 +83,11 @@ print_suites(struct suiteq * suites)
 {
 	tailq_suite *suite_item = NULL;
 	TAILQ_FOREACH(suite_item, suites, entries) {
-		const char *name = "noname";
+		const char *name = NULL;
 		if (suite_item->name != (char *)NULL) {
 			name = suite_item->name;
 		}
-		printf("\nSUITE: %s", name);
-		if (suite_item->timestamp != (char *)NULL) {
-			printf(" (%s)", suite_item->timestamp);
-		}
-		printf("\n");
+		printf("\nSuite: %s\n", name);
 		if (!TAILQ_EMPTY(suite_item->tests)) {
 			print_tests(suite_item->tests);
 		} else {
@@ -102,14 +99,19 @@ print_suites(struct suiteq * suites)
 void
 print_tests(struct testq * tests)
 {
+	static int n = 1;
+	const int name_width = 53;
+	const char *dots = "....................................................";
 	tailq_test *test_item = NULL;
 	TAILQ_FOREACH(test_item, tests, entries) {
-		printf("\t%4.4s ", format_status(test_item->status));
-		if (test_item->time != NULL) {
-			char buf[16];
-			format_sec(atof(test_item->time), buf);
-			printf("%s ", buf);
-		}
-		printf("%s\n", test_item->name);
+		printf("Test #%.4d: %.*s ", n, name_width, test_item->name);
+                if ((int)strlen(test_item->name) <= name_width) {
+                  printf("%.*s", name_width - (int)strlen(test_item->name), dots);
+                }
+		printf("%5s ", format_status(test_item->status));
+		if (test_item->time != NULL)
+		    printf("%3.4s sec", test_item->time);
+		printf("\n");
+		n++;
 	}
 }
