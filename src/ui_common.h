@@ -31,6 +31,5 @@
 
 const char *format_status(enum test_status status);
 const char *format_string(enum test_format format);
-void format_sec(double sec, char *out);
 
 #endif				/* UI_COMMON_H */

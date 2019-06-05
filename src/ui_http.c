@@ -162,7 +162,6 @@ print_html_tests(struct testq * tests) {
     TAILQ_FOREACH(test_item, tests, entries) {
 	printf("<tr>\n");
 	const char *name = NULL;
-	char buf[16];
 	if (test_item->name != NULL) {
 		name = test_item->name;
 	} else {
@@ -170,8 +169,7 @@ print_html_tests(struct testq * tests) {
 	}
 	printf("<td>%s</td>\n", name);
 	printf("<td>%s</td>\n", format_status(test_item->status));
-	format_sec(atof(test_item->time), buf);
-	printf("<td>%s</td>\n", buf);
+	printf("<td>%3.4s</td>\n", test_item->time);
 	printf("<td></td>\n");
 	printf("</tr>\n");
     }
