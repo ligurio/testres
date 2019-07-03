@@ -95,7 +95,7 @@ main(int argc, char *argv[])
 	   return 1;
 	}
 
-	config *conf;
+	config *conf = NULL;
 	conf = calloc(1, sizeof(config));
 	if (conf == NULL) {
 		perror("calloc:");
@@ -118,8 +118,8 @@ main(int argc, char *argv[])
 		}
 	}
 
-	struct reportq *reports;
-	struct tailq_report *report;
+	struct reportq *reports = NULL;
+	struct tailq_report *report = NULL;
 	if (S_ISREG(path_st.st_mode)) {
 		if (name != NULL) {
 			fprintf(stderr, "testcase metrics not supported for single report\n");
