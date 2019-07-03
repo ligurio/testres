@@ -173,7 +173,7 @@ static void test_sha1()
 	const char *word = tests[i].word;
         SHA1_CTX ctx;
         SHA1Init(&ctx);
-        SHA1Update(&ctx, word, strlen(word));
+        SHA1Update(&ctx, (const unsigned char*)word, strlen(word));
         SHA1Final(digest, &ctx);
 		/*
         if (digest_to_str(str, digest, length) != tests[i].digest) {
