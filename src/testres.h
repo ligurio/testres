@@ -35,7 +35,7 @@
 #define	SLOWEST_THRESHOLD 5
 
 enum mode { TEXT_MODE, HTTP_MODE };
-enum source { SOURCE_SQLITE, SOURCE_DIR, SOURCE_FILE };
+enum source { SOURCE_GIT, SOURCE_DIR, SOURCE_FILE };
 
 struct config {
 	enum mode mode;

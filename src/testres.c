@@ -126,7 +126,7 @@ main(int argc, char *argv[])
 			return 1;
 		}
 		if (check_sqlite(path) == 0) {
-			conf->source = SOURCE_SQLITE;
+			conf->source = SOURCE_GIT;
 			reports = process_db(path);
 		} else {
 			conf->source = SOURCE_FILE;
