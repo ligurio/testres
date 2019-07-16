@@ -29,6 +29,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wundef -Wpointer-arith -Wcast-align -Wshado
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-overflow=5 -Wwrite-strings -Waggregate-return")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wswitch-enum -Wunreachable-code -Winit-self")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter -Werror -pedantic")
+if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+endif()
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O3")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O0 -g")
