@@ -1,0 +1,15 @@
+language: c
+compiler:
+  - clang
+  - gcc
+
+addons:
+  apt:
+    packages:
+      - cunit
+      - libxml2
+
+script:
+  - cmake --version
+  - cmake CMakeLists.txt
+  - cmake --build .
