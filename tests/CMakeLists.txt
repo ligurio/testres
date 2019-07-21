@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.9.2)
 
 set(CMAKE_C_FLAGS "-std=c99 -O0 -Wall -Wextra -Wimplicit")
 

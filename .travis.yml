@@ -3,10 +3,13 @@ compiler:
   - clang
   - gcc
 
+dist: bionic
+
 addons:
   apt:
     packages:
-      - cunit
+      - libcunit1
+      - libcunit1-dev
       - libxml2
 
 script:
