@@ -41,8 +41,6 @@
 #include <sys/types.h>
 #include <sys/queue.h>
 
-#include "testres.h"
-
 enum test_format {
 	FORMAT_UNKNOWN,
 	FORMAT_TAP13,
@@ -138,7 +136,6 @@ tailq_report *process_file(char *path);
 tailq_test *make_test(char *name, char *time, char *comment);
 unsigned char *digest_to_str(unsigned char *str, unsigned char digest[], unsigned int n);
 struct tailq_report *is_report_exists(struct reportq *reports, const char* report_id);
-int cgi_parse(char *query_string, struct config *conf);
 
 /*
 static int cmp_date(const void *p1, const void *p2);

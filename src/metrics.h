@@ -29,7 +29,8 @@
 #ifndef METRICS_H
 #define METRICS_H
 
-#include "parse_common.h"
+struct tailq_report;
+struct reportq;
 
 int metric_apfd(struct reportq *reports, char *tc_name);
 double metric_tc_avg_time(struct reportq *reports, char *tc_name);

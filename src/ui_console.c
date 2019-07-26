@@ -27,6 +27,7 @@
  */
 
 #include "metrics.h"
+#include "testres.h"
 #include "parse_common.h"
 #include "ui_console.h"
 #include "ui_common.h"

@@ -27,8 +27,10 @@
  */
 
 #include <math.h>
+#include <parse_common.h>
 
 #include "metrics.h"
+#include "testres.h"
 
 /* FIXME: passed, failed and skipped calculated twice */
 double metric_pass_rate(struct tailq_report *report) {

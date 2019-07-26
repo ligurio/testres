@@ -36,7 +36,8 @@ void print_html_report(struct tailq_report *report);
 void print_html_suites(struct suiteq * suites);
 void print_html_tests(struct testq * tests);
 void print_html_env();
-
 void print_plot(struct reportq *reports);
+
+int cgi_parse(char *query_string, struct config *conf);
 
 #endif				/* UI_HTTP_H */
