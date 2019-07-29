@@ -8,8 +8,6 @@ dist: bionic
 addons:
   apt:
     packages:
-      - libcunit1
-      - libcunit1-dev
       - libxml2
 
 script:
