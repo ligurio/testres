@@ -1,0 +1,2 @@
+uxsuccess: bzrlib.tests.test_config.TestListOption.test_convert_invalid
+uxsuccess bzrlib.tests.test_config.TestListOption.test_convert_invalid

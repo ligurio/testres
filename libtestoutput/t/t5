@@ -1,0 +1,32 @@
+xfail: bzrlib.tests.test_config.TestListOption.test_convert_invalid
+xfail bzrlib.tests.test_config.TestListOption.test_convert_invalid
+xfail: bzrlib.tests.blackbox.test_branch.TestSmartServerBranching.test_branch_to_stacked_from_trivial_branch_streaming_acceptance [ multipart
+Content-Type: text/plain;charset=utf8
+reason
+28
+branching to stacked requires VFS access0
+Content-Type: text/x-traceback;charset=utf8,language=python
+traceback
+628
+Traceback (most recent call last):
+testtools.matchers._impl.MismatchError: no VFS calls expected, got: get('/extra/from/.bzr/branch-format'),stat('/extra/from/.bzr'),get('/extra/from/.bzr/repository/format'),stat('/extra/from/.bzr/repository'),get('/extra/from/.bzr/repository/pack-names'),readv('/extra/from/.bzr/repository/indices/de97e2496fa3dd45b2359f2f1a626191.iix'),readv('/extra/from/.bzr/repository/indices/73e8a504afe122b1ce8268cda633f5bb.iix'),readv('/extra/from/.bzr/repository/indices/6ad3854f879988a5e3baed976f5342a8.iix'),readv('/extra/from/.bzr/repository/indices/66b0cf2139ffb950f9218ce76513d6b6.iix'),readv('/extra/from/.bzr/repository/indices/61fe9316a5297e923be85e5a6cad0c3d.iix'),readv('/extra/from/.bzr/repository/indices/5e5b018349a58a874cf866e170096caf.iix'),readv('/extra/from/.bzr/repository/indices/42b85dec38b4b4f9dcd1d6a843c917c0.iix'),readv('/extra/from/.bzr/repository/indices/3aa1b850870affa8c2e89a58b01fb5b6.iix'),readv('/extra/from/.bzr/repository/indices/1dabcc74cbb528ef836dfb7fe2379135.iix'),readv('/extra/from/.bzr/repository/packs/1dabcc74cbb528ef836dfb7fe2379135.pack'),readv('/extra/from/.bzr/repository/indices/1dabcc74cbb528ef836dfb7fe2379135.cix'),readv('/extra/from/.bzr/repository/indices/de97e2496fa3dd45b2359f2f1a626191.cix'),readv('/extra/from/.bzr/repository/packs/de97e2496fa3dd45b2359f2f1a626191.pack'),readv('/extra/from/.bzr/repository/packs/de97e2496fa3dd45b2359f2f1a626191.pack'),get('/extra/from/.bzr/branch-format'),stat('/extra/from/.bzr'),get('/extra/from/.bzr/repository/format'),stat('/extra/from/.bzr/repository')
+0
+]
+xfail: bzrlib.tests.blackbox.test_commit.TestCommit.test_non_ascii_file_unversioned_iso_8859_5 [ multipart
+Content-Type: text/plain;charset=utf8
+reason
+2A
+Error messages are always written as UTF-80
+Content-Type: text/x-traceback;charset=utf8,language=python
+traceback
+11B
+Traceback (most recent call last):
+AssertionError: b'string \'\\xc2\\xa7\' found in \'\'\'Committing to: /tmp/testbzr-yZyPQl.tmp/bzrlib.tests.blackbox.test_commit.TestCommit.test_non_ascii_file_unversioned_iso_8859_5/work/\nbzr: ERROR: Path(s) are not versioned: "\xc2\xa7"\n\'\'\''
+0
+]
+xfail: bzrlib.tests.test_http.TestAuth.test_changing_nonce(pycurl,HTTP/1.0,digest) [ multipart
+Content-Type: text/plain;charset=utf8
+reason
+25
+pycurl does not handle a nonce change0
+]

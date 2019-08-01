@@ -1,0 +1,11 @@
+skip: bzrlib.tests.test_config.TestListOption.test_convert_invalid
+skip bzrlib.tests.test_config.TestListOption.test_convert_invalid
+skip: bzrlib.tests.blackbox.test_conflicts.TestUnicodePathsOnAsciiTerminal.test_text_conflict_paths [ multipart
+Content-Type: text/plain;charset=utf8
+reason
+34
+Need to decide if replacing is the desired behaviour0
+]
+skip: bzrlib.tests.test_http.TestBadProtocolServer.test_http_has(pycurl,HTTP/1.1) [
+pycurl doesn't check the protocol version
+]

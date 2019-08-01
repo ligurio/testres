@@ -1,0 +1,48 @@
+successful: bzrlib.doc.api.DocFileTest(/usr/lib64/python2.7/site-packages/bzrlib/doc/api/branch.txt)
+successful bzrlib.doc.api.DocFileTest(/usr/lib64/python2.7/site-packages/bzrlib/doc/api/branch.txt)
+success: bzrlib.doc.api.DocFileTest(/usr/lib64/python2.7/site-packages/bzrlib/doc/api/branch.txt)
+success bzrlib.doc.api.DocFileTest(/usr/lib64/python2.7/site-packages/bzrlib/doc/api/branch.txt)
+successful: bzrlib.tests.blackbox.test_add.TestAdd.test_add_control_dir(pre-views) [ multipart
+]
+successful: bzrlib.tests.blackbox.test_cat.TestCat.test_cat [ multipart
+Content-Type: text/plain;charset=utf8
+start_bzr_subprocess-log-0
+1E9
+
+this is a debug log for diagnosing/reporting problems in bzr
+you can delete or truncate this file, or include sections in
+bug reports to https://bugs.launchpad.net/bzr/+filebug
+
+Tue 2016-07-05 12:17:18 +0000
+0.035  bazaar version: 2.6.0
+0.035  bzr arguments: [u'--no-plugins', u'cat', u'a']
+0.039  encoding stdout as osutils.get_user_encoding() 'utf-8'
+0.060  opening working tree '/tmp/testbzr-yZyPQl.tmp/bzrlib.tests.blackbox.test_cat.TestCat.test_cat/work/branch'
+0.064  return code 0
+0
+]
+successful: bzrlib.tests.blackbox.test_debug.TestDebugBytes.test_bytes_reports_activity [ multipart
+Content-Type: text/plain;charset=utf8
+start_bzr_subprocess-log-0
+7A6
+
+this is a debug log for diagnosing/reporting problems in bzr
+you can delete or truncate this file, or include sections in
+bug reports to https://bugs.launchpad.net/bzr/+filebug
+
+Tue 2016-07-05 12:17:29 +0000
+0.038  bazaar version: 2.6.0
+0.038  bzr arguments: [u'--no-plugins', u'branch', u'-Dbytes', u'-Oprogress_bar=text', u'bzr://127.0.0.1:40952/extra//tree', u'target']
+0.042  encoding stdout as osutils.get_user_encoding() 'utf-8'
+0.092  creating repository in file:///tmp/testbzr-yZyPQl.tmp/bzrlib.tests.blackbox.test_debug.TestDebugBytes.test_bytes_reports_activity/work/target/.bzr/.
+0.100  Using fetch logic to copy between RemoteRepository(bzr://127.0.0.1:40952/extra//tree/.bzr/)(RemoteRepositoryFormat(_network_name='Bazaar repository format 2a (needs bzr 1.16 or later)\n')) and CHKInventoryRepository('file:///tmp/testbzr-yZyPQl.tmp/bzrlib.tests.blackbox.test_debug.TestDebugBytes.test_bytes_reports_activity/work/target/.bzr/repository/')(RepositoryFormat2a())
+0.100  fetching: <PendingAncestryResult heads:frozenset(['jrandom@example.com-20160705121729-xh2hcp4oq4ysqgi8']) repo:RemoteRepository(bzr://127.0.0.1:40952/extra//tree/.bzr/)>
+0.125  creating branch <bzrlib.branch.BzrBranchFormat7 object at 0x7f96efc69910> in file:///tmp/testbzr-yZyPQl.tmp/bzrlib.tests.blackbox.test_debug.TestDebugBytes.test_bytes_reports_activity/work/target/
+0.137  created new branch BzrBranch7(file:///tmp/testbzr-yZyPQl.tmp/bzrlib.tests.blackbox.test_debug.TestDebugBytes.test_bytes_reports_activity/work/target/)
+0.143  trying to create missing lock '/tmp/testbzr-yZyPQl.tmp/bzrlib.tests.blackbox.test_debug.TestDebugBytes.test_bytes_reports_activity/work/target/.bzr/checkout/dirstate'
+0.144  opening working tree '/tmp/testbzr-yZyPQl.tmp/bzrlib.tests.blackbox.test_debug.TestDebugBytes.test_bytes_reports_activity/work/target'
+[14367] 2016-07-05 12:17:29.858 INFO: Branched 1 revision.
+0.169  Transferred: 4kB (38.3kB/s r:3kB w:1kB)
+0.169  return code 0
+0
+]
