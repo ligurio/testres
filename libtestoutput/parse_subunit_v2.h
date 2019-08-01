@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Sergey Bronnikov
+ * Copyright © 2018-2019 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,17 +46,29 @@
 #define FLAG_EOF		0x0010
 #define FLAG_FILE_CONTENT	0x0040
 
-struct subunit_header {
+#define _STATUS_UNDEFINED 	0x000
+#define _STATUS_ENUMERATION 	0x001
+#define _STATUS_INPROGRESS	0x002
+#define _STATUS_SUCCESS		0x003
+#define _STATUS_UXSUCCESS	0x004
+#define _STATUS_SKIPPED		0x005
+#define _STATUS_FAILED		0x006
+#define _STATUS_UXFAILURE	0x007
+
+typedef struct subunit_packet {
     uint8_t  signature;
     uint16_t flags;
-} __attribute__ ((packed));
+    uint16_t length;
+    uint32_t timestamp;
+    char *testid;
+    char *tags;
+    char *mime;
+    char *content;
+    char *routing_code;
+    char *crc32;
+} __attribute__ ((packed)) subunit_packet;
 
-typedef struct subunit_header subunit_header;
-
-typedef uint32_t timestamp;
-
-uint32_t read_field(FILE *stream);
-tailq_test *read_subunit_v2_packet(FILE *stream);
+int read_subunit_v2_packet(const void *buf, subunit_packet *p);
 struct suiteq *parse_subunit_v2(FILE *stream);
 int is_subunit_v2(char* path);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Sergey Bronnikov
+ * Copyright © 2018-2019 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,10 +36,6 @@
 
 #include "parse_subunit_v2.h"
 
-// https://github.com/testing-cabal/subunit/blob/master/python/subunit/v2.py#L412
-// https://github.com/testing-cabal/subunit
-// https://gist.github.com/ligurio/c173e9af1b766cf6626f7037cbb78d72
-
 #define HI(x)  ((x) >> 8)
 #define LO(x)  ((x) & 0xFF)
 
@@ -48,7 +44,7 @@ int is_subunit_v2(char* path)
 	FILE *file;
 	file = fopen(path, "r");
 	if (file == NULL) {
-		printf("failed to open file %s\n", path);
+		perror("fopen");
 		return -1;
 	}
 
@@ -57,13 +53,13 @@ int is_subunit_v2(char* path)
 	n_bytes = fread(&signature, 1, 1, file);
 	fclose(file);
 	if (n_bytes == 0) {
+		perror("fread");
 		return -1;
 	}
-	if (signature == SUBUNIT_SIGNATURE) {
-		return 0;
-	} else {
-		return 1;
-	}
+
+	int rc;
+	rc = (signature == SUBUNIT_SIGNATURE) ? 0 : 1;
+	return rc;
 }
 
 const void* read_uint8(const void* buffer, uint8_t* value)
@@ -77,7 +73,6 @@ const void* read_uint8(const void* buffer, uint8_t* value)
 
 const void* read_uint16(const void* buffer, uint16_t* value)
 {
-    /* FIXME: network byte order */
     const uint16_t* vptr = (uint16_t*)buffer;
     *value = *vptr;
     vptr++;
@@ -85,183 +80,99 @@ const void* read_uint16(const void* buffer, uint16_t* value)
     return vptr;
 }
 
-uint32_t read_field(FILE * stream)
+const void* read_uint32(const void* buffer, uint32_t* value)
 {
+    const uint32_t* vptr = (uint32_t*)buffer;
+    *value = *vptr;
+    vptr++;
 
-	uint32_t field_value = 0;
-	uint8_t byte = 0, byte0 = 0;
-	uint16_t buf = 0;
-	uint8_t prefix = 0;
-
-	int n_bytes = 0;
-
-	n_bytes = fread(&byte, 1, 1, stream);
-	if (n_bytes == 0) {
-		return 0;
-	}
-	prefix = byte >> 6;
-	byte0 = byte & 0x3f;
-	if (prefix == 0x00) {
-		field_value = byte0;
-	} else if (prefix == 0x40) {
-		n_bytes = fread(&byte, 1, 1, stream);
-		if (n_bytes == 0) {
-			return 0;
-		}
-		field_value = (byte0 << 8) | byte;
-	} else if (prefix == 0x80) {
-		n_bytes = fread(&buf, 2, 1, stream);
-		if (n_bytes == 0) {
-			return 0;
-		}
-		field_value = (byte << 16) | buf;
-	} else {
-		n_bytes = fread(&buf, 1, 2, stream);
-		if (n_bytes == 0) {
-			return 0;
-		}
-		field_value = (byte0 << 24) | buf << 8;
-
-		n_bytes = fread(&byte, 1, 1, stream);
-		if (n_bytes == 0) {
-			return 0;
-		}
-		field_value = field_value | byte;
-	};
-
-	return field_value;
+    return vptr;
 }
 
 struct suiteq *
 parse_subunit_v2(FILE * stream)
 {
-	tailq_suite *suite_item;
-	suite_item = calloc(1, sizeof(tailq_suite));
-	if (suite_item == NULL) {
-		perror("malloc failed");
+	printf("DEBUG: parse_subunit_v2()\n");
+	int rc = 0, n_bytes = 0;
+	rc = fseek(stream, 0L, SEEK_END);
+	if (rc != 0) {
 		return NULL;
 	}
-
-	suite_item->tests = calloc(1, sizeof(struct testq));
-	if (suite_item->tests == NULL) {
-		perror("malloc failed");
-		free_suite(suite_item);
+	n_bytes = ftell(stream);
+	fseek(stream, 0L, SEEK_SET);	
+	void *buffer;
+	buffer = (char*)calloc(n_bytes, sizeof(char));	
+	if (buffer == NULL) {
+		perror("calloc");
 		return NULL;
 	}
+	fread(buffer, sizeof(char), n_bytes, stream);
 
-	TAILQ_INIT(suite_item->tests);
-	tailq_test *test_item = NULL;
-
-	test_item = read_subunit_v2_packet(stream);
-	if (test_item != NULL)
-		TAILQ_INSERT_TAIL(suite_item->tests, test_item, entries);
-
-	/*
-	while (!feof(stream)) {
-		test_item = read_packet(stream);
-		if (test_item != NULL)
-			TAILQ_INSERT_TAIL(suite_item->tests, test_item, entries);
-		else
-		{
-			free_tests(suite_item->tests);
-			free_suite(suite_item);
-			return NULL;
-		}
+	subunit_packet packet = { 0 };
+	rc = read_subunit_v2_packet((const void*)buffer, &packet);
+	if (rc == 0) {
+		printf("read_subunit_v2_packet() is ok\n");
 	}
-	*/
 
-	struct suiteq *suites = NULL;
-	suites = calloc(1, sizeof(struct suiteq));
-	if (suites == NULL) {
-		perror("malloc failed");
-		free_suite(suite_item);
-	}
-	TAILQ_INIT(suites);
-	TAILQ_INSERT_TAIL(suites, suite_item, entries);
-
-	return suites;
+	return NULL;
 }
 
-tailq_test *
-read_subunit_v2_packet(FILE * stream)
+int read_subunit_v2_packet(const void *buf, subunit_packet *p)
 {
-	subunit_header header;
-	int n_bytes = 0;
-	n_bytes = fread(&header, sizeof(subunit_header), 1, stream);
-	if ((n_bytes == 0) || (n_bytes < (int)sizeof(subunit_header))) {
-		return NULL;
+	uint8_t sig = 0;
+	buf = read_uint8(buf, &p->signature);
+	if (p->signature != SUBUNIT_SIGNATURE)
+	{
+	    return -1;
 	}
-	tailq_test *test_item;
-	test_item = calloc(1, sizeof(tailq_test));
-	if (test_item == NULL) {
-		perror("malloc failed");
-		return NULL;
-	}
+	buf = read_uint16(buf, &p->flags);
+	printf("SIGNATURE: %02hhX\n", p->signature);
+	printf("FLAGS: %02hX\n", p->flags);
 
-	uint16_t flags = htons(header.flags);
-	printf("SIGNATURE: %02hhX\n", header.signature);
-	printf("FLAGS: %02hX\n", flags);
-	assert(header.signature == SUBUNIT_SIGNATURE);
+	uint8_t version = 0;
+	version = HI(htons(p->flags)) >> 4;
+	printf("VERSION: %d\n", version);
 
-	int8_t version;
-	version = HI(flags) >> 4;
-	printf("\tVERSION: %d\n", version);
-	assert(version == SUBUNIT_VERSION);
-
-	/*
-	int8_t status;
-	status = flags & 0x0007;
-	printf("\tSTATUS: %d\n", status);
-	test_item->status = status;
+	uint8_t status = 0;
+	status = p->flags & 0x0007;
+	printf("STATUS: %d\n", status);
 	assert(status <= 0x0007);
 
-	uint32_t field_value;
-	field_value = read_field(stream);
-	printf("TOTAL LENGTH: %u\n", field_value);
-	assert(field_value < PACKET_MAX_LENGTH);
+	uint32_t len;
+	buf = read_uint32(buf, &len);
+	printf("TOTAL LENGTH: %u\n", len);
+	assert(len < PACKET_MAX_LENGTH);
 
-	if (flags & FLAG_TIMESTAMP) {
-		printf("FLAG_TIMESTAMP ");
-		field_value = read_field(stream);
-		printf("%08X\n", field_value);
+	if (p->flags & FLAG_TIMESTAMP) {
+		uint32_t timestamp;
+		printf("FLAG_TIMESTAMP");
+		buf = read_uint32(buf, &timestamp);
+		printf(" %d\n", timestamp);
 	};
-	if (flags & FLAG_TEST_ID) {
-		printf("FLAG_TEST_ID ");
-		field_value = read_field(stream);
-		printf("%08X\n", field_value);
+	if (p->flags & FLAG_TEST_ID) {
+		printf(" FLAG_TEST_ID ");
 	};
-	if (flags & FLAG_TAGS) {
-		printf("FLAG_TAGS ");
-		field_value = read_field(stream);
-		printf("%02X\n", field_value);
+	if (p->flags & FLAG_TAGS) {
+		printf(" FLAG_TAGS");
 	};
-	if (flags & FLAG_MIME_TYPE) {
-		printf("FLAG_MIME_TYPE ");
-		field_value = read_field(stream);
-		printf("%02X\n", field_value);
+	if (p->flags & FLAG_MIME_TYPE) {
+		printf(" FLAG_MIME_TYPE");
 	};
-	if (flags & FLAG_FILE_CONTENT) {
-		printf("FLAG_FILE_CONTENT ");
-		field_value = read_field(stream);
-		printf("%08X\n", field_value);
+	if (p->flags & FLAG_FILE_CONTENT) {
+		printf(" FLAG_FILE_CONTENT");
 	};
-	if (flags & FLAG_ROUTE_CODE) {
-		printf("FLAG_ROUTE_CODE ");
-		field_value = read_field(stream);
-		printf("%08X\n", field_value);
+	if (p->flags & FLAG_ROUTE_CODE) {
+		printf(" FLAG_ROUTE_CODE");
 	};
-	if (flags & FLAG_EOF) {
-		printf("FLAG_EOF\n");
+	if (p->flags & FLAG_EOF) {
+		printf(" FLAG_EOF");
 	};
-	if (flags & FLAG_RUNNABLE) {
-		printf("FLAG_RUNNABLE\n");
+	if (p->flags & FLAG_RUNNABLE) {
+		printf(" FLAG_RUNNABLE");
 	};
-	printf("CRC32: ");
-	field_value = read_field(stream);
-	printf("%08X\n", field_value);
-	*/
+	printf("\n");
 
-	return test_item;
+	return 0;
 }
 
 

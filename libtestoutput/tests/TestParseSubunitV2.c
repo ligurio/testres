@@ -13,33 +13,28 @@
 
 void TestParseSubunitV2()
 {
-    // Packet sample, with test id, runnable set, status=enumeration.
+    // Sample of SubUnit v2 packet with test id, runnable set, enumeration status.
     // Spaces below are to visually break up:
     // signature / flags / length / testid / crc32
     // b3 2901 0c 03666f6f 08555f1b
     // echo 03666f6f | xxd -p -r
 
-    subunit_header sample_header = { .signature = 0xb3, .flags = ntohs(0x2901) };
-    uint16_t sample_length = 0x0c;
-    uint32_t sample_testid = 0x03666f6f;
-    uint32_t sample_crc32 = 0x08555f1b;
+    /* const uint8_t raw_packet = "b329010c03666f6f08555f1b"; */
+    const uint8_t raw_packet[] = { 0xb3, 0x29, 0x01, 0x0c, 0x03 };	
 
-    char* buf = NULL;
-    size_t buf_size = 0;
-    tailq_test * test;
-    FILE* stream = open_memstream(&buf, &buf_size);
-    fwrite(&sample_header, 1, sizeof(sample_header), stream);
-    fwrite(&sample_length, 1, sizeof(sample_length), stream);
-    fwrite(&sample_testid, 1, sizeof(sample_testid), stream);
-    fwrite(&sample_crc32, 1, sizeof(sample_crc32), stream);
+    subunit_packet packet = { 0 };
+    int rc = 0;
+    rc = read_subunit_v2_packet(&raw_packet, &packet);
+    if (rc != 0) {
+      printf("read_subunit_v2_packet() is not ok\n");
+    }
 
-    test = read_subunit_v2_packet(stream);
-    fclose(stream);
-
-    assert(strcmp(test->name, "") == 0);
-
-    free(buf);
-    free(test);
+    assert(packet->signature == SUBUNIT_SIGNATURE);
+    assert(packet->flags == FLAG_RUNNABLE);
+    assert(packet->length == 10);
+    assert(strcmp(packet->testid, "") == 0);
+    assert(packet->status == _STATUS_ENUMERATION);
+    assert(packet->crc32 == 0);
 }
 
 void test_is_subunit_v2()
