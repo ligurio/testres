@@ -164,7 +164,7 @@ int read_subunit_v2_packet(const void *buf, subunit_packet *p)
 	assert((p->status) <= 0x0007);
 
 	buf = read_uint32(buf, &p->length);
-	assert(length < PACKET_MAX_LENGTH);
+	assert((p->length) < PACKET_MAX_LENGTH);
 
 	if (p->flags & FLAG_TIMESTAMP) {
 		buf = read_uint32(buf, &p->timestamp);
