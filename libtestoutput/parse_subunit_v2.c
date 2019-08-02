@@ -90,16 +90,34 @@ const void* read_uint32(const void* buffer, uint32_t* value)
     return vptr;
 }
 
-const void* read_varint(const void* buffer, uint8_t *n_bytes)
+const void* read_varint(const void* buffer, const void *content)
 {
     assert(buffer == NULL);
-    buffer = read_uint8(buffer, n_bytes);
-    printf("Bytes %d\n", *n_bytes);
-    assert(*n_bytes != 0);
-    uint8_t value = 0;
-    for(int i = 0; i <= *n_bytes; i++) {
-        buffer = read_uint8(buffer, &value);
-    }
+    uint8_t byte_1 = 0, n_bytes = 0, value_0 = 0;
+    uint16_t byte_2 = 0;
+    buffer = read_uint8(buffer, &byte_1);
+    n_bytes = byte_1 & 0xc0;
+    value_0 = byte_1 & 0x3f;
+
+    content = (const void*)malloc(n_bytes);
+    memset(content, 0, n_bytes);
+    switch (n_bytes) {
+    case 0x00:
+    	*content = value_0;
+        break;
+    case 0x40:
+	buffer = read_uint8(buffer, &byte_1);
+    	*(uint16_t)content = value_0 << 8 | byte_1;
+        break;
+    case 0x40:
+	buffer = read_uint16(buffer, &byte_2);
+    	*(uint32_t)content = value_0 << 16 | byte_2;
+        break;
+    default:
+	buffer = read_uint8(buffer, &byte_1);
+	buffer = read_uint16(buffer, &byte_2);
+    	*(uint32_t)content = (value_0 << 24) | byte_1 << 8 | byte_2;
+    };
 
     return buffer;
 }
@@ -163,7 +181,9 @@ int read_subunit_v2_packet(const void *buf, subunit_packet *p)
 	p->status = p->flags & 0x0007;
 	assert((p->status) <= 0x0007);
 
-	buf = read_uint32(buf, &p->length);
+	const void* data;
+	buf = read_varint(buf, data);
+	p->length = (uint32_t*)data;
 	assert((p->length) < PACKET_MAX_LENGTH);
 
 	if (p->flags & FLAG_TIMESTAMP) {
@@ -172,24 +192,24 @@ int read_subunit_v2_packet(const void *buf, subunit_packet *p)
 
 	uint8_t n_bytes = 0;
 	if (p->flags & FLAG_TEST_ID) {
-		buf = read_varint(buf, &n_bytes);
-		printf("FLAG_TEST_ID %d bytes\n", n_bytes);
+		buf = read_varint(buf, data);
+		p->testid = (char*)data;
 	};
 	if (p->flags & FLAG_TAGS) {
-		buf = read_varint(buf, &n_bytes);
-		printf("FLAG_TAGS %d bytes\n", n_bytes);
+		buf = read_varint(buf, data);
+		p->tags = (char*)data;
 	};
 	if (p->flags & FLAG_MIME_TYPE) {
-		buf = read_varint(buf, &n_bytes);
-		printf("FLAG_MIME_TYPE %d bytes\n", n_bytes);
+		buf = read_varint(buf, data);
+		p->mime_type = (char*)data;
 	};
 	if (p->flags & FLAG_FILE_CONTENT) {
-		buf = read_varint(buf, &n_bytes);
-		printf("FLAG_FILE_CONTENT %d bytes\n", n_bytes);
+		buf = read_varint(buf, data);
+		p->content = (char*)data;
 	};
 	if (p->flags & FLAG_ROUTE_CODE) {
-		buf = read_varint(buf, &n_bytes);
-		printf("FLAG_ROUTE_CODE %d bytes\n", n_bytes);
+		buf = read_varint(buf, data);
+		p->routing_code = (char*)data;
 	};
 	if (p->flags & FLAG_EOF) { /* nothing to do */ };
 	if (p->flags & FLAG_RUNNABLE) { /* nothing to do */ };
