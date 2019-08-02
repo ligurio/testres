@@ -56,12 +56,12 @@
 #define _STATUS_UXFAILURE	0x007
 
 typedef struct subunit_packet {
-    uint8_t  signature;
-    uint16_t flags;
+    uint8_t signature;
     uint8_t status;
+    uint8_t version;
+    uint16_t flags;
     uint32_t length;
     uint32_t timestamp;
-    uint8_t version;
     char *testid;
     char *tags;
     char *mime;

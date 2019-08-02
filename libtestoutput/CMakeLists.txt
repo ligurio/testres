@@ -14,6 +14,8 @@ parse_testanything.h
 parse_testanything.c
 sha1.h
 sha1.c
+crc32.h
+crc32.c
 )
 
 include(FindEXPAT)

@@ -183,6 +183,7 @@ process_file(char *path)
 		fclose(file);
 		return NULL;
 	}
+
 	enum test_format format;
 	format = detect_format(path);
 	switch (format) {
@@ -206,6 +207,20 @@ process_file(char *path)
 		report->format = FORMAT_UNKNOWN;
 		return report;
 	}
+
+	/*
+	if ((report->suites = parse_junit(file)) != NULL) {
+		report->format = FORMAT_JUNIT;
+	} else if ((report->suites = parse_testanything(file)) != NULL) {
+		report->format = FORMAT_TAP13;
+	} else if ((report->suites = parse_subunit_v1(file)) != NULL) {
+		report->format = FORMAT_SUBUNIT_V1;
+	} else if ((report->suites = parse_subunit_v2_from_file(path)) != NULL) {
+		report->format = FORMAT_SUBUNIT_V2;
+	} else {
+		report->format = FORMAT_UNKNOWN;
+	}
+	*/
 	fclose(file);
 
 	report->path = (unsigned char*)strdup(path);
