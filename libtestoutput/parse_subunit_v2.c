@@ -157,14 +157,14 @@ int read_subunit_v2_packet(const void *buf, subunit_packet *p)
 
 	p->version = HI(htons(p->flags)) >> 4;
 	if (p->version == 2) {
-		assert(p->flags & 0x0008 == 0);
+		assert((p->flags & 0x0008) == 0);
 	}
 
 	p->status = p->flags & 0x0007;
-	assert(p->status <= 0x0007);
+	assert((p->status) <= 0x0007);
 
 	buf = read_uint32(buf, &p->length);
-	assert(len < PACKET_MAX_LENGTH);
+	assert(length < PACKET_MAX_LENGTH);
 
 	if (p->flags & FLAG_TIMESTAMP) {
 		buf = read_uint32(buf, &p->timestamp);
