@@ -200,7 +200,7 @@ process_file(char *path)
 		break;
 	case FORMAT_SUBUNIT_V2:
 		report->format = FORMAT_SUBUNIT_V2;
-		report->suites = parse_subunit_v2(file);
+		report->suites = parse_subunit_v2_from_file(path);
 		break;
 	case FORMAT_UNKNOWN:
 		report->format = FORMAT_UNKNOWN;

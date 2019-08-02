@@ -58,8 +58,10 @@
 typedef struct subunit_packet {
     uint8_t  signature;
     uint16_t flags;
-    uint16_t length;
+    uint8_t status;
+    uint32_t length;
     uint32_t timestamp;
+    uint8_t version;
     char *testid;
     char *tags;
     char *mime;
@@ -69,7 +71,12 @@ typedef struct subunit_packet {
 } __attribute__ ((packed)) subunit_packet;
 
 int read_subunit_v2_packet(const void *buf, subunit_packet *p);
-struct suiteq *parse_subunit_v2(FILE *stream);
+struct suiteq *parse_subunit_v2_from_file(const char *path);
 int is_subunit_v2(char* path);
+
+const void* read_uint8(const void* buffer, uint8_t* value);
+const void* read_uint16(const void* buffer, uint16_t* value);
+const void* read_uint32(const void* buffer, uint32_t* value);
+const void* read_varint(const void* buffer, uint8_t *n_bytes);
 
 #endif				/* PARSE_SUBUNIT_V2_H */

@@ -30,9 +30,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <arpa/inet.h>
-#include <zlib.h>
 
 #include "parse_subunit_v2.h"
 
@@ -64,6 +62,7 @@ int is_subunit_v2(char* path)
 
 const void* read_uint8(const void* buffer, uint8_t* value)
 {
+    assert(buffer == NULL);
     const uint8_t* vptr = (uint8_t*)buffer;
     *value = *vptr;
     vptr++;
@@ -73,6 +72,7 @@ const void* read_uint8(const void* buffer, uint8_t* value)
 
 const void* read_uint16(const void* buffer, uint16_t* value)
 {
+    assert(buffer == NULL);
     const uint16_t* vptr = (uint16_t*)buffer;
     *value = *vptr;
     vptr++;
@@ -82,6 +82,7 @@ const void* read_uint16(const void* buffer, uint16_t* value)
 
 const void* read_uint32(const void* buffer, uint32_t* value)
 {
+    assert(buffer == NULL);
     const uint32_t* vptr = (uint32_t*)buffer;
     *value = *vptr;
     vptr++;
@@ -89,29 +90,56 @@ const void* read_uint32(const void* buffer, uint32_t* value)
     return vptr;
 }
 
-struct suiteq *
-parse_subunit_v2(FILE * stream)
+const void* read_varint(const void* buffer, uint8_t *n_bytes)
 {
-	printf("DEBUG: parse_subunit_v2()\n");
+    assert(buffer == NULL);
+    buffer = read_uint8(buffer, n_bytes);
+    assert(*n_bytes != 0);
+
+    for(int i = 0; i <= *n_bytes; i++) {
+        buffer = read_uint8(buffer, n_bytes);
+    }
+
+    return buffer;
+}
+
+struct suiteq *
+parse_subunit_v2_from_file(const char *path)
+{
+	FILE *fd;
 	int rc = 0, n_bytes = 0;
-	rc = fseek(stream, 0L, SEEK_END);
-	if (rc != 0) {
+	void *buffer;
+
+	fd = fopen(path, "r");
+	if (fd == NULL) {
+		perror("fopen");
 		return NULL;
 	}
-	n_bytes = ftell(stream);
-	fseek(stream, 0L, SEEK_SET);	
-	void *buffer;
-	buffer = (char*)calloc(n_bytes, sizeof(char));	
+	rc = fseek(fd, 0L, SEEK_END);
+	if (rc != 0) {
+		fclose(fd);
+		return NULL;
+	}
+	n_bytes = ftell(fd);
+	fseek(fd, 0L, SEEK_SET);	
+	buffer = calloc(n_bytes, sizeof(char));	
 	if (buffer == NULL) {
 		perror("calloc");
+		fclose(fd);
 		return NULL;
 	}
-	fread(buffer, sizeof(char), n_bytes, stream);
+	fread(buffer, sizeof(char), n_bytes, fd);
+	fclose(fd);
 
 	subunit_packet packet = { 0 };
 	rc = read_subunit_v2_packet((const void*)buffer, &packet);
 	if (rc == 0) {
-		printf("read_subunit_v2_packet() is ok\n");
+		printf("SIGNATURE: %02hhX\n", packet.signature);
+		printf("FLAGS: %02hX\n", packet.flags);
+		printf("VERSION: %d\n", packet.version);
+		printf("STATUS: %d\n", packet.status);
+		printf("TIMESTAMP: %d\n", packet.timestamp);
+		printf("TOTAL LENGTH: %u\n", packet.length);
 	}
 
 	return NULL;
@@ -126,51 +154,47 @@ int read_subunit_v2_packet(const void *buf, subunit_packet *p)
 	    return -1;
 	}
 	buf = read_uint16(buf, &p->flags);
-	printf("SIGNATURE: %02hhX\n", p->signature);
-	printf("FLAGS: %02hX\n", p->flags);
 
-	uint8_t version = 0;
-	version = HI(htons(p->flags)) >> 4;
-	printf("VERSION: %d\n", version);
+	p->version = HI(htons(p->flags)) >> 4;
+	if (p->version == 2) {
+		assert(p->flags & 0x0008 == 0);
+	}
 
-	uint8_t status = 0;
-	status = p->flags & 0x0007;
-	printf("STATUS: %d\n", status);
-	assert(status <= 0x0007);
+	p->status = p->flags & 0x0007;
+	assert(p->status <= 0x0007);
 
-	uint32_t len;
-	buf = read_uint32(buf, &len);
-	printf("TOTAL LENGTH: %u\n", len);
+	buf = read_uint32(buf, &p->length);
 	assert(len < PACKET_MAX_LENGTH);
 
 	if (p->flags & FLAG_TIMESTAMP) {
-		uint32_t timestamp;
-		printf("FLAG_TIMESTAMP");
-		buf = read_uint32(buf, &timestamp);
-		printf(" %d\n", timestamp);
+		buf = read_uint32(buf, &p->timestamp);
 	};
+
+	uint8_t n_bytes = 0;
 	if (p->flags & FLAG_TEST_ID) {
-		printf(" FLAG_TEST_ID ");
+		buf = read_varint(buf, &n_bytes);
+		printf("FLAG_TEST_ID %d bytes\n", n_bytes);
 	};
 	if (p->flags & FLAG_TAGS) {
-		printf(" FLAG_TAGS");
+		buf = read_varint(buf, &n_bytes);
+		printf("FLAG_TAGS %d bytes\n", n_bytes);
 	};
 	if (p->flags & FLAG_MIME_TYPE) {
-		printf(" FLAG_MIME_TYPE");
+		buf = read_varint(buf, &n_bytes);
+		printf("FLAG_MIME_TYPE %d bytes\n", n_bytes);
 	};
 	if (p->flags & FLAG_FILE_CONTENT) {
-		printf(" FLAG_FILE_CONTENT");
+		buf = read_varint(buf, &n_bytes);
+		printf("FLAG_FILE_CONTENT %d bytes\n", n_bytes);
 	};
 	if (p->flags & FLAG_ROUTE_CODE) {
-		printf(" FLAG_ROUTE_CODE");
+		buf = read_varint(buf, &n_bytes);
+		printf("FLAG_ROUTE_CODE %d bytes\n", n_bytes);
 	};
-	if (p->flags & FLAG_EOF) {
-		printf(" FLAG_EOF");
-	};
-	if (p->flags & FLAG_RUNNABLE) {
-		printf(" FLAG_RUNNABLE");
-	};
-	printf("\n");
+	if (p->flags & FLAG_EOF) { /* nothing to do */ };
+	if (p->flags & FLAG_RUNNABLE) { /* nothing to do */ };
+
+	printf("CRC32: %s\n", (char*)buf);
 
 	return 0;
 }
@@ -185,13 +209,6 @@ http://bxr.su/OpenBSD/bin/md5/crc.c
 
 https://rosettacode.org/wiki/CRC-32#C
 http://csbruce.com/software/crc32.c
-
-Parse timestamp
-int y, M, d, h, m;
-float sec;
-char *dateStr = "2014-11-12T19:12:14.505Z";
-sscanf(dateStr, "%d-%d-%dT%d:%d:%fZ", &y, &M, &d, &h, &m, &sec);
-https://github.com/mlabbe/c_date_parse
 
 UTF-8
 https://github.com/benkasminbullock/unicode-c/blob/master/unicode.c

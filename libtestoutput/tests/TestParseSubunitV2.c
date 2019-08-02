@@ -19,11 +19,10 @@ void TestParseSubunitV2()
     // b3 2901 0c 03666f6f 08555f1b
     // echo 03666f6f | xxd -p -r
 
-    /* const uint8_t raw_packet = "b329010c03666f6f08555f1b"; */
-    const uint8_t raw_packet[] = { 0xb3, 0x29, 0x01, 0x0c, 0x03 };	
+    int rc = 0;
+    const uint8_t raw_packet[] = { 0xb3, 0x29, 0x01, 0x0c, 0x03, 0x66, 0x6f, 0x6f, 0x08, 0x55, 0x5f, 0x1b };	
 
     subunit_packet packet = { 0 };
-    int rc = 0;
     rc = read_subunit_v2_packet(&raw_packet, &packet);
     if (rc != 0) {
       printf("read_subunit_v2_packet() is not ok\n");
@@ -48,14 +47,11 @@ void test_is_subunit_v2()
 
 void test_parse_subunit_v2()
 {
-    const char *name = SAMPLE_FILE_SUBUNIT_V2;
-    FILE *file;
-
-    file = fopen(name, "r");
-    assert(file == NULL);
-
     struct suiteq *suites;
-    suites = parse_subunit_v2(file);
-    fclose(file);
+    const char *path = SAMPLE_FILE_SUBUNIT_V2;
+    FILE *fd;
+
+    suites = parse_subunit_v2_from_file(path);
+    assert(suites != NULL);
     free(suites);
 }
