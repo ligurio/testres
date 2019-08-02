@@ -186,8 +186,10 @@ int read_subunit_v2_packet(const void *buf, subunit_packet *p)
 	p->length = (uint32_t*)data;
 	assert((p->length) < PACKET_MAX_LENGTH);
 
+	/* https://github.com/testing-cabal/subunit/blob/master/python/subunit/v2.py#L446 */
 	if (p->flags & FLAG_TIMESTAMP) {
 		buf = read_uint32(buf, &p->timestamp);
+		buf = read_varint(buf, nanoseconds);
 	};
 
 	uint8_t n_bytes = 0;
