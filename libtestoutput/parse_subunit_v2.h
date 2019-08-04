@@ -77,6 +77,6 @@ int is_subunit_v2(char* path);
 const void* read_uint8(const void* buffer, uint8_t* value);
 const void* read_uint16(const void* buffer, uint16_t* value);
 const void* read_uint32(const void* buffer, uint32_t* value);
-const void* read_varint(const void* buffer, const void *content);
+const void* read_varint(const void* buffer, uint32_t content);
 
 #endif				/* PARSE_SUBUNIT_V2_H */

@@ -62,7 +62,6 @@ int is_subunit_v2(char* path)
 
 const void* read_uint8(const void* buffer, uint8_t* value)
 {
-    assert(buffer == NULL);
     const uint8_t* vptr = (uint8_t*)buffer;
     *value = *vptr;
     vptr++;
@@ -72,7 +71,6 @@ const void* read_uint8(const void* buffer, uint8_t* value)
 
 const void* read_uint16(const void* buffer, uint16_t* value)
 {
-    assert(buffer == NULL);
     const uint16_t* vptr = (uint16_t*)buffer;
     *value = *vptr;
     vptr++;
@@ -82,7 +80,6 @@ const void* read_uint16(const void* buffer, uint16_t* value)
 
 const void* read_uint32(const void* buffer, uint32_t* value)
 {
-    assert(buffer == NULL);
     const uint32_t* vptr = (uint32_t*)buffer;
     *value = *vptr;
     vptr++;
@@ -90,33 +87,30 @@ const void* read_uint32(const void* buffer, uint32_t* value)
     return vptr;
 }
 
-const void* read_varint(const void* buffer, const void *content)
+const void* read_varint(const void* buffer, uint32_t content)
 {
-    assert(buffer == NULL);
     uint8_t byte_1 = 0, n_bytes = 0, value_0 = 0;
     uint16_t byte_2 = 0;
     buffer = read_uint8(buffer, &byte_1);
     n_bytes = byte_1 & 0xc0;
     value_0 = byte_1 & 0x3f;
 
-    content = (const void*)malloc(n_bytes);
-    memset(content, 0, n_bytes);
     switch (n_bytes) {
     case 0x00:
-    	*content = value_0;
+		content = value_0;
         break;
     case 0x40:
-	buffer = read_uint8(buffer, &byte_1);
-    	*(uint16_t)content = value_0 << 8 | byte_1;
+		buffer = read_uint8(buffer, &byte_1);
+		content = value_0 << 8 | byte_1;
         break;
-    case 0x40:
-	buffer = read_uint16(buffer, &byte_2);
-    	*(uint32_t)content = value_0 << 16 | byte_2;
+    case 0x80:
+		buffer = read_uint16(buffer, &byte_2);
+		content = value_0 << 16 | byte_2;
         break;
     default:
-	buffer = read_uint8(buffer, &byte_1);
-	buffer = read_uint16(buffer, &byte_2);
-    	*(uint32_t)content = (value_0 << 24) | byte_1 << 8 | byte_2;
+		buffer = read_uint8(buffer, &byte_1);
+		buffer = read_uint16(buffer, &byte_2);
+		content = (value_0 << 24) | byte_1 << 8 | byte_2;
     };
 
     return buffer;
@@ -127,7 +121,7 @@ parse_subunit_v2_from_file(const char *path)
 {
 	FILE *fd;
 	int rc = 0, n_bytes = 0;
-	void *buffer;
+	const void *buffer;
 
 	fd = fopen(path, "r");
 	if (fd == NULL) {
@@ -140,8 +134,8 @@ parse_subunit_v2_from_file(const char *path)
 		return NULL;
 	}
 	n_bytes = ftell(fd);
-	fseek(fd, 0L, SEEK_SET);	
-	buffer = calloc(n_bytes, sizeof(char));	
+	fseek(fd, 0L, SEEK_SET);
+	buffer = calloc(n_bytes, sizeof(char));
 	if (buffer == NULL) {
 		perror("calloc");
 		fclose(fd);
@@ -151,72 +145,50 @@ parse_subunit_v2_from_file(const char *path)
 	fclose(fd);
 
 	subunit_packet packet = { 0 };
-	rc = read_subunit_v2_packet((const void*)buffer, &packet);
-	if (rc == 0) {
-		printf("SIGNATURE: %02hhX\n", packet.signature);
-		printf("FLAGS: %02hX\n", packet.flags);
-		printf("VERSION: %d\n", packet.version);
-		printf("STATUS: %d\n", packet.status);
-		printf("TIMESTAMP: %d\n", packet.timestamp);
-		printf("TOTAL LENGTH: %u\n", packet.length);
+	while (rc == 0) {
+			rc = read_subunit_v2_packet(&buffer, &packet);
+			if (rc == 0) {
+				printf("SubUnit v2 packet =================\n");
+				printf("SIGNATURE: %02hhX\n", packet.signature);
+				printf("FLAGS: %02hX\n", packet.flags);
+				printf("VERSION: %d\n", packet.version);
+				printf("STATUS: %d\n", packet.status);
+				printf("TIMESTAMP: %d\n", packet.timestamp);
+				printf("TOTAL LENGTH: %u\n", packet.length);
+			}
 	}
 
 	return NULL;
 }
 
-int read_subunit_v2_packet(const void *buf, subunit_packet *p)
+int read_subunit_v2_packet(const void **buf, subunit_packet *p)
 {
-	buf = read_uint8(buf, &p->signature);
+	const void* buffer = buf;
+	buffer = read_uint8(buffer, &p->signature);
 	if (p->signature != SUBUNIT_SIGNATURE)
 	{
 	    return -1;
 	}
-	buf = read_uint16(buf, &p->flags);
-
+	buffer = read_uint16(buffer, &p->flags);
 	p->version = HI(htons(p->flags)) >> 4;
-	if (p->version == 2) {
-		assert((p->flags & 0x0008) == 0);
-	}
-
 	p->status = p->flags & 0x0007;
 	assert((p->status) <= 0x0007);
 
-	const void* data;
-	buf = read_varint(buf, data);
-	p->length = (uint32_t*)data;
-	assert((p->length) < PACKET_MAX_LENGTH);
+	buffer = read_varint(buffer, p->length);
 
-	/* https://github.com/testing-cabal/subunit/blob/master/python/subunit/v2.py#L446 */
 	if (p->flags & FLAG_TIMESTAMP) {
-		buf = read_uint32(buf, &p->timestamp);
-		buf = read_varint(buf, nanoseconds);
+		buffer = read_uint32(buffer, &p->timestamp);
 	};
 
-	uint8_t n_bytes = 0;
-	if (p->flags & FLAG_TEST_ID) {
-		buf = read_varint(buf, data);
-		p->testid = (char*)data;
-	};
-	if (p->flags & FLAG_TAGS) {
-		buf = read_varint(buf, data);
-		p->tags = (char*)data;
-	};
-	if (p->flags & FLAG_MIME_TYPE) {
-		buf = read_varint(buf, data);
-		p->mime_type = (char*)data;
-	};
-	if (p->flags & FLAG_FILE_CONTENT) {
-		buf = read_varint(buf, data);
-		p->content = (char*)data;
-	};
-	if (p->flags & FLAG_ROUTE_CODE) {
-		buf = read_varint(buf, data);
-		p->routing_code = (char*)data;
-	};
+	if (p->flags & FLAG_TEST_ID) { };
+	if (p->flags & FLAG_TAGS) { };
+	if (p->flags & FLAG_MIME_TYPE) { };
+	if (p->flags & FLAG_FILE_CONTENT) { };
+	if (p->flags & FLAG_ROUTE_CODE) { };
 	if (p->flags & FLAG_EOF) { /* nothing to do */ };
 	if (p->flags & FLAG_RUNNABLE) { /* nothing to do */ };
 
-	/* printf("CRC32: %s\n", (char*)buf); */
+	buf = buffer;
 
 	return 0;
 }

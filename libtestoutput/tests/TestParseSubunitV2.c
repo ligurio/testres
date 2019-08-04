@@ -20,7 +20,7 @@ void TestParseSubunitV2()
     // echo 03666f6f | xxd -p -r
 
     int rc = 0;
-    const uint8_t raw_packet[] = { 0xb3, 0x29, 0x01, 0x0c, 0x03, 0x66, 0x6f, 0x6f, 0x08, 0x55, 0x5f, 0x1b };	
+    const uint8_t raw_packet[] = { 0xb3, 0x29, 0x01, 0x0c, 0x03, 0x66, 0x6f, 0x6f, 0x08, 0x55, 0x5f, 0x1b };
 
     subunit_packet packet = { 0 };
     rc = read_subunit_v2_packet(&raw_packet, &packet);
@@ -28,12 +28,12 @@ void TestParseSubunitV2()
       printf("read_subunit_v2_packet() is not ok\n");
     }
 
-    assert(packet->signature == SUBUNIT_SIGNATURE);
-    assert(packet->flags == FLAG_RUNNABLE);
-    assert(packet->length == 10);
-    assert(strcmp(packet->testid, "") == 0);
-    assert(packet->status == _STATUS_ENUMERATION);
-    assert(packet->crc32 == 0);
+    assert(packet.signature == SUBUNIT_SIGNATURE);
+    assert(packet.flags == FLAG_RUNNABLE);
+    assert(packet.length == 10);
+    assert(strcmp(packet.testid, "") == 0);
+    assert(packet.status == _STATUS_ENUMERATION);
+    assert(packet.crc32 == 0);
 }
 
 void test_is_subunit_v2()
