@@ -1,0 +1,96 @@
+<html>
+  <head>
+    <style>
+      svg {
+        width: 400px;
+        height: 400px;
+      }
+    </style>
+  </head>
+
+  <!-- color palette https://www.color-hex.com/color-palette/81481 -->
+ 
+  <body>
+    <!-- donut -->
+    <!-- https://www.tune-it.ru/web/leksa/blog/-/blogs/1996382 -->
+    <!-- https://medium.com/@heyoka/scratch-made-svg-donut-pie-charts-in-html5-2c587e935d72 -->
+    <svg viewbox="0 0 400 400">
+      <circle r="80" cx="100" cy="100" fill="none" stroke-width="12" stroke="#ce2020"/>
+      <circle r="80" cx="100" cy="100" fill="none" stroke-width="12" stroke="#1ca168"
+              stroke-linecap="round" stroke-dasharray="226 502.4"
+              stroke-dashoffset="-45" />
+      <text x="100" y="125" font-family="Arial" font-size="70"
+            text-anchor="middle" fill="#444">
+        44
+      </text>
+    </svg>
+
+   <!-- line -->
+   <svg width='100%' height='65px'>
+     <g class='bars'>
+       <rect fill='#bdbdbd' width='100%' height='10'></rect>;
+       <rect fill='#ce2020' width='75%' height='10'></rect>
+       <rect fill='#1ca168' width='25%' height='10'></rect>
+     </g>
+   </svg>
+   
+   <!-- histogram -->
+   <!-- https://github.com/zserge/metric -->
+   <!-- https://codepen.io/team/css-tricks/pen/Zbervy -->
+   <svg viewBox="0 0 500 100" class="chart">
+        <polyline id="failed" fill="none" stroke="#ce2020" stroke-width="4" 
+	     points="
+	       00,150
+	       20,60
+	       40,80
+	       60,20
+	       80,80
+	       100,80
+	       120,60
+	       140,100
+	       160,90
+	       180,80
+	       200, 110
+	       220, 10
+	       240, 70
+	       260, 100
+	       280, 100
+	       300, 40
+	       320, 0
+	       340, 100
+	       360, 100
+	       380, 120
+	       400, 60
+	       420, 70
+	       440, 80
+	     ">
+        </polyline>
+        <polyline id="passed" fill="none" stroke="#1ca168" stroke-width="4" 
+	     points="
+	       00,150
+	       30,80
+	       60,110
+	       80,110
+	       90,100
+	       120,80
+	       140,140
+	       160,40
+	       180,130
+	       200, 150
+	       220, 90
+	       240, 110
+	       260, 120
+	       280, 100
+	       300, 40
+	       320, 0
+	       340, 100
+	       360, 100
+	       380, 120
+	       400, 60
+	       420, 70
+	       440, 80
+	     ">
+        </polyline>
+   </svg>
+  </body>
+</html>
