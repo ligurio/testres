@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Sergey Bronnikov
+ * Copyright © 2018-2019 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,18 @@
     int yylex(void);
 %}
 
-%token GT LT LE GE EQ COLON NL
-%token FMT SUITE TEST HOSTNAME HOST CREATED PASSRATE
-%token FORMAT DATE NAME NUMBER
+%token EQ GT GE LT LE COLON NL
+%token FMT_KEYWORD SUITE_KEYWORD TEST_KEYWORD HOSTNAME_KEYWORD
+%token CREATED_KEYWORD PASSRATE_KEYWORD
+%token HOST FORMAT DATE NAME NUMBER
 
 /*
  * https://github.com/jgarzik/sqlfun/blob/master/sql.y
+ * https://github.com/jgarzik/sqlfun/blob/master/sql.l
+ *
  * https://github.com/itechbear/SimpleQueryParser/blob/master/parser.y
+ * https://github.com/itechbear/SimpleQueryParser/blob/master/lexer.l
+ *
  * https://github.com/wclever/NdYaccLexTool/tree/master/progs
  *
  */
@@ -50,31 +55,31 @@ program		: program expression NL
 		|
 		;
 
-expression	: TEST COLON NAME {
+expression	: TEST_KEYWORD COLON NAME {
 			printf("TEST\n");
 		}
-		| SUITE COLON NAME {
+		| SUITE_KEYWORD COLON NAME {
 			printf("SUITE\n");
 		}
-		| FMT COLON FORMAT {
+		| FMT_KEYWORD COLON FORMAT {
 			printf("FMT\n");
 		}
-		| HOSTNAME COLON HOST {
+		| HOSTNAME_KEYWORD COLON HOST {
 			printf("HOSTNAME\n");
 		}
-		| CREATED compare_op DATE {
+		| CREATED_KEYWORD compare_op DATE {
 			printf("CREATED\n");
 		}
-		| PASSRATE compare_op NUMBER {
+		| PASSRATE_KEYWORD compare_op NUMBER {
 			printf("PASSRATE\n");
 		}
 		;
 
 compare_op	: EQ
 		| GT
+		| GE
 		| LT
 		| LE
-		| GE
 		;
 %%
 
@@ -94,7 +99,6 @@ void yyerror(char *s)
 int main( int argc, char **argv ) {
 
   progname = argv[0];
-
   if (argc > 1)
   {
 	yyin = fopen(argv[1], "r");
@@ -104,9 +108,8 @@ int main( int argc, char **argv ) {
 		return -1;
 	}
   }
-
   yyparse();
+  close(yyin);
 
-  /* close(yyin); */
   return 0;
 }

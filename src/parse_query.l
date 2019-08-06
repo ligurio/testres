@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Sergey Bronnikov
+ * Copyright © 2018-2019 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,6 @@
  *
  */
 
-/*
- * https://github.com/jgarzik/sqlfun/blob/master/sql.l
- * https://github.com/itechbear/SimpleQueryParser/blob/master/lexer.l
- * https://github.com/wclever/NdYaccLexTool/tree/master/progs
- *
- */
-
 %{
 #include <stdio.h>
 #include "parse_query.tab.h"
@@ -44,36 +37,36 @@ extern void yyerror(char *s);
 %option noyywrap
 
 FORMAT			"junit"|"testanything"|"subunit_v1"|"subunit_v2"
-FMT				"fmt"
-SUITE			"suite"
-TEST			"test"
-PASSRATE		"passrate"
-CREATED			"created"
-HOSTNAME		"hostname"
+FMT_KEYWORD		"fmt"
+SUITE_KEYWORD		"suite"
+TEST_KEYWORD		"test"
+PASSRATE_KEYWORD	"passrate"
+CREATED_KEYWORD		"created"
+HOSTNAME_KEYWORD	"hostname"
 HOST			[A-Za-z][A-Za-z0-9\.\-]+
 DIGIT			[0-9]
 SYMBOLS			[A-Za-z0-9_\-]
 
 %%
-">"					return GT;
-"<"					return LT;
-"="					return EQ;
-"<="				return LE;
+"="				return EQ;
+">"				return GT;
 ">="				return GE;
-":"					return COLON;
-{FMT}{1}			return FMT;
-{SUITE}{1}			return SUITE;
-{TEST}{1}			return TEST;
-{HOSTNAME}{1}		return HOSTNAME;
-{CREATED}{1}		return CREATED;
-{PASSRATE}{1}		return PASSRATE;
+"<"				return LT;
+"<="				return LE;
+":"				return COLON;
+{FMT_KEYWORD}{1}		return FMT_KEYWORD;
+{SUITE_KEYWORD}{1}		return SUITE_KEYWORD;
+{TEST_KEYWORD}{1}		return TEST_KEYWORD;
+{HOSTNAME_KEYWORD}{1}		return HOSTNAME_KEYWORD;
+{CREATED_KEYWORD}{1}		return CREATED_KEYWORD;
+{PASSRATE_KEYWORD}{1}		return PASSRATE_KEYWORD;
 {FORMAT}{1}			return FORMAT;
 {DIGIT}{8}			return DATE;
 {DIGIT}+			return NUMBER;
 {HOST}{1}			return HOST;
 {SYMBOLS}+			return NAME;
-\n					return NL;
+\n				return NL;
 [ \t]+				/* skip whitespace */;
-.					{ yyerror("Unrecognized character"); }
+.				{ yyerror("Unrecognized character"); }
 
 %%
