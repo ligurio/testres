@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <limits.h>
 
 #include "parse_subunit_v2.h"
 
@@ -62,6 +63,7 @@ int is_subunit_v2(char* path)
 
 const void* read_uint8(const void* buffer, uint8_t* value)
 {
+    assert(buffer);
     const uint8_t* vptr = (uint8_t*)buffer;
     *value = *vptr;
     vptr++;
@@ -71,6 +73,7 @@ const void* read_uint8(const void* buffer, uint8_t* value)
 
 const void* read_uint16(const void* buffer, uint16_t* value)
 {
+    assert(buffer);
     const uint16_t* vptr = (uint16_t*)buffer;
     *value = *vptr;
     vptr++;
@@ -80,6 +83,7 @@ const void* read_uint16(const void* buffer, uint16_t* value)
 
 const void* read_uint32(const void* buffer, uint32_t* value)
 {
+    assert(buffer);
     const uint32_t* vptr = (uint32_t*)buffer;
     *value = *vptr;
     vptr++;
@@ -87,8 +91,23 @@ const void* read_uint32(const void* buffer, uint32_t* value)
     return vptr;
 }
 
+/*
+#define bitsizeof(x)  (CHAR_BIT * sizeof(x))
+
+#ifdef __GNUC__
+#define TYPEOF(x) (__typeof__(x))
+#else
+#define TYPEOF(x)
+#endif
+
+#define MSB(x, bits) ((x) & TYPEOF(x)(~0ULL << (bitsizeof(x) - (bits))))
+
+extern int encode_varint(uintmax_t, unsigned char *);
+extern uintmax_t decode_varint(const unsigned char **);
+
 const void* read_varint(const void* buffer, uint32_t content)
 {
+    assert(buffer);
     uint8_t byte_1 = 0, n_bytes = 0, value_0 = 0;
     uint16_t byte_2 = 0;
     buffer = read_uint8(buffer, &byte_1);
@@ -115,6 +134,68 @@ const void* read_varint(const void* buffer, uint32_t content)
 
     return buffer;
 }
+*/
+
+uintmax_t decode_varint(const unsigned char **bufp)
+{
+	const unsigned char *buf = *bufp;
+	unsigned char c = *buf++;
+	uintmax_t val = c & 127;
+	while (c & 128) {
+		val += 1;
+		if (!val || MSB(val, 7))
+			return 0; /* overflow */
+		c = *buf++;
+		val = (val << 7) + (c & 127);
+	}
+	*bufp = buf;
+	return val;
+}
+
+int encode_varint(uintmax_t value, unsigned char *buf)
+{
+	unsigned char varint[16];
+	unsigned pos = sizeof(varint) - 1;
+	varint[pos] = value & 127;
+	while (value >>= 7)
+		varint[--pos] = 128 | (--value & 127);
+	if (buf)
+		memcpy(buf, varint + pos, sizeof(varint) - pos);
+	return sizeof(varint) - pos;
+}
+
+void to_seq(uint64_t x, uint8_t *out)
+{
+	int i, j;
+	for (i = 9; i > 0; i--) {
+		if (x & 127ULL << i * 7) break;
+	}
+	for (j = 0; j <= i; j++)
+		out[j] = ((x >> ((i - j) * 7)) & 127) | 128;
+ 
+	out[i] ^= 128;
+}
+ 
+uint64_t from_seq(uint8_t *in)
+{
+	uint64_t r = 0;
+ 
+	do {
+		r = (r << 7) | (uint64_t)(*in & 127);
+	} while (*in++ & 128);
+ 
+	return r;
+}
+
+/*
+seq from 7f: [ 7f ] back: 7f
+seq from 4000: [ 81 80 00 ] back: 4000
+seq from 0: [ 00 ] back: 0
+seq from 3ffffe: [ 81 ff ff 7e ] back: 3ffffe
+seq from 1fffff: [ ff ff 7f ] back: 1fffff
+seq from 200000: [ 81 80 80 00 ] back: 200000
+seq from 3311a1234df31413: [ b3 88 e8 a4 b4 ef cc a8 13 ] back: 3311a1234df31413
+*/
 
 struct suiteq *
 parse_subunit_v2_from_file(const char *path)
@@ -141,8 +222,8 @@ parse_subunit_v2_from_file(const char *path)
 		fclose(fd);
 		return NULL;
 	}
-	fread(buffer, sizeof(char), n_bytes, fd);
-	fclose(fd);
+	// fread(buffer, sizeof(char), n_bytes, fd);
+	// fclose(fd);
 
 	subunit_packet packet = { 0 };
 	while (rc == 0) {
@@ -174,7 +255,7 @@ int read_subunit_v2_packet(const void **buf, subunit_packet *p)
 	p->status = p->flags & 0x0007;
 	assert((p->status) <= 0x0007);
 
-	buffer = read_varint(buffer, p->length);
+	buffer = decode_varint((void*)buffer);
 
 	if (p->flags & FLAG_TIMESTAMP) {
 		buffer = read_uint32(buffer, &p->timestamp);
@@ -188,7 +269,7 @@ int read_subunit_v2_packet(const void **buf, subunit_packet *p)
 	if (p->flags & FLAG_EOF) { /* nothing to do */ };
 	if (p->flags & FLAG_RUNNABLE) { /* nothing to do */ };
 
-	buf = buffer;
+	buf = (const void*)buffer;
 
 	return 0;
 }
