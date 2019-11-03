@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.9.2)
 
-set(MODULE_NAME "TestLibTestOutput")
+set(MODULE_NAME "test_libtestoutput")
 set(MODULE_PREFIX "TEST_LIB_TEST_OUTPUT")
 
 set(${MODULE_PREFIX}_DRIVER ${MODULE_NAME}.c)
@@ -15,7 +15,7 @@ create_test_sourcelist(${MODULE_PREFIX}_SRCS
         ${${MODULE_PREFIX}_DRIVER}
         ${${MODULE_PREFIX}_TESTS})
 
-include_directories(..)
+include_directories("${CMAKE_BINARY_DIR}/libtestoutput")
 add_executable(${MODULE_NAME} ${${MODULE_PREFIX}_SRCS})
 set(${MODULE_PREFIX}_LIBS testoutput ${EXPAT_LIBRARIES} m)
 target_link_libraries(${MODULE_NAME} ${${MODULE_PREFIX}_LIBS})

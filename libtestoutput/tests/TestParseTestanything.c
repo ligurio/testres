@@ -1,11 +1,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-
-#include "parse_common.h"
-#include "parse_testanything.h"
+#include <parse_common.h>
 
 #define SAMPLE_FILE_TESTANYTHING "samples/testanything.tap"
+
+extern struct suiteq *parse_testanything(FILE *f);
 
 void TestParseTestanything()
 {

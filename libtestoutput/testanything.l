@@ -1,6 +1,5 @@
 /*
- * Copyright © 2015-2017 Katherine Flavel <kate@elide.org>
- * Copyright © 2018 Sergey Bronnikov
+ * Copyright © 2018-2019 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,44 +26,48 @@
  *
  */
 
-#ifndef PARSE_TESTANYTHING_H
-#define PARSE_TESTANYTHING_H
+%{
+#include <stdio.h>
+#include <limits.h>	/* strtol() */
+#include <stdlib.h> /* strtol() */
 
-enum ast_status {
-	AST_OK,
-	AST_NOTOK,
-	AST_MISSING,
-	AST_TODO,
-	AST_SKIP
-};
+#include "parse_testanything.tab.h"
+//#include "parse_common.h"
 
-struct ast_line {
-	/* TODO: comment flag */
-	const char *text;
-	struct ast_line *next;
-};
+extern YYSTYPE yylval;
+%}
 
-struct ast_test {
-	const char *name;
-	enum ast_status status;
-	unsigned int rep;
-	struct ast_line *line;
-	struct ast_test *next;
-};
+%option nounput
+%option noinput
+%option yylineno
+%option noyywrap
 
-const char *
-ast_status(enum ast_status status);
+DIGIT			[0-9]
+YAML_START		"---"
+YAML_END		"..."|"---"
+DOTS			".."
+SKIP			[Ss][Kk][Ii][Pp]([Pp][Ee][Dd])?
+TODO			"TODO"
+OK				"ok"
+NOT				"not"
+BAILOUT			"Bail out!"
+SYMBOL			[[:alpha:][:punct:]]
+TAP_VERSION		^"TAP version"
 
-struct ast_line *
-ast_line(struct ast_line **head, const char *text);
-
-struct ast_test *
-ast_test(struct ast_test **head, enum ast_status status, const char *name);
-
-void
-print(FILE *f, const struct ast_test *tests);
-
-struct ast_test *parse_testanything_raw(FILE *f);
-struct suiteq *parse_testanything(FILE *f);
-
-#endif				/* PARSE_TESTANYTHING_H */
+%%
+{OK}{1}			return OK;
+{NOT}{1}		return NOT;
+{BAILOUT}{1}		return BAILOUT;
+{TODO}{1}		return TODO;
+{SKIP}{1}		return SKIP;
+{TAP_VERSION}{1}	return TAP_VERSION;
+-			return DASH;
+#			return HASH;
+{DIGIT}{1}{DOTS}{1}{DIGIT}+	{ yylval.string = strdup(yytext); return PLAN; }
+{YAML_START}{1}		return YAML_START;
+{YAML_END}{1}		return YAML_END;
+{DIGIT}+		{ yylval.long_val = strtol(yytext, 0, 10); return NUMBER; }
+{SYMBOL}+		{ yylval.string = strdup(yytext); return WORD; };
+\n			return NL;
+[ \t]+			/* skip whitespace */
+%%

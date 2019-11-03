@@ -33,8 +33,9 @@
 #include "parse_junit.h"
 #include "parse_subunit_v1.h"
 #include "parse_subunit_v2.h"
-#include "parse_testanything.h"
 #include "sha1.h"
+
+extern struct suiteq *parse_testanything(FILE *f);
 
 void
 free_reports(struct reportq * reports)
