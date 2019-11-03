@@ -1,5 +1,7 @@
 ## testres
 
+[![Build Status](https://travis-ci.org/ligurio/testres.svg?branch=master)](https://travis-ci.org/ligurio/testres)
+
 A hyperfast web frontend for software testing results written in C.
 
 It builds and runs on OpenBSD, Linux, and Mac OS X.
