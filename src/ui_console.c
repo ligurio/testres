@@ -34,10 +34,12 @@
 
 void
 print_report(struct tailq_report *report) {
-    if (!TAILQ_EMPTY(report->suites)) {
-    	print_suites(report->suites);
-    } else {
-    	printf("None suites.\n");
+    if (report->suites) {
+	if (!TAILQ_EMPTY(report->suites)) {
+	    print_suites(report->suites);
+	} else {
+	    printf("None suites.\n");
+	}
     }
     
     printf("\n--------------------------------------------------------------------------------\n");

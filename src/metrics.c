@@ -116,8 +116,9 @@ int metric_apfd(struct reportq *reports, char *tc_name) {
 
 char *metric_slowest_testcase(struct tailq_report *report) {
 
-	if (!report)
+	if ((!report) || (!report->suites)) {
 	  return NULL;
+        }
 
 	char *slowest = NULL;
 	double time = 0;
@@ -143,8 +144,9 @@ char *metric_slowest_testcase(struct tailq_report *report) {
 
 double metric_total_time(struct tailq_report *report) {
 
-	if (!report)
+	if ((!report) || (!report->suites)) {
 	  return 0;
+        }
 
 	double time = 0;
 	tailq_suite *suite_item = NULL;
