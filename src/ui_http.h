@@ -38,6 +38,4 @@ void print_html_tests(struct testq * tests);
 void print_html_env();
 void print_plot(struct reportq *reports);
 
-int cgi_parse(char *query_string, struct config *conf);
-
 #endif				/* UI_HTTP_H */

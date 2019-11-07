@@ -194,17 +194,3 @@ void print_html_env() {
     }
     printf("</pre>\n");
 }
-
-int cgi_parse(char *query_string, struct config *conf) {
-	if (query_string == NULL) {
-		conf->cgi_action = (char*)"/";
-		return 0;
-        }
-	conf->cgi_action = strtok(query_string, "=");
-	conf->cgi_args = strtok(NULL, "=");
-	if (conf->cgi_action == NULL) {
-		return 1;
-	}
-
-	return 0;
-}

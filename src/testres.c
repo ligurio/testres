@@ -45,25 +45,17 @@
 void
 usage(char *path)
 {
-	char *name = basename(path);
-	fprintf(stderr, "Usage: %s [-s file | directory] [-t name] [-h|-v]\n", name);
+	char *progname = basename(path);
+	fprintf(stderr, "Usage: %s [-s file | -h | -v]\n", progname);
 }
 
 int
 main(int argc, char *argv[])
 {
-	char *path = (char *) NULL;
-	char *name = (char *) NULL;
+	char *path = NULL;
 	int opt = 0;
 
-#ifdef __OpenBSD__
-	if (pledge("stdio rpath", NULL) == -1) {
-	    warn("pledge");
-	    return EXIT_FAILURE;
-	}
-#endif /* __OpenBSD__ */
-
-	while ((opt = getopt(argc, argv, "vhs:t:")) != -1) {
+	while ((opt = getopt(argc, argv, "vhs:")) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
@@ -73,9 +65,6 @@ main(int argc, char *argv[])
 			return 0;
 		case 's':
 			path = realpath(optarg, path);
-			break;
-		case 't':
-			name = optarg;
 			break;
 		default:	/* '?' */
 			usage(argv[0]);
@@ -90,113 +79,19 @@ main(int argc, char *argv[])
 
 	struct stat path_st;
 	if (stat(path, &path_st) == -1) {
-	   fprintf(stderr, "cannot open specified path");
-	   perror("stat:");
+	   perror("stat");
+	   free(path);
 	   return 1;
 	}
 
-	config *conf = NULL;
-	conf = calloc(1, sizeof(config));
-	if (conf == NULL) {
-		perror("calloc:");
-		return 1;
-	}
-
-	if (isatty(fileno(stdin)) == 0) {
-		conf->mode = HTTP_MODE;
-	} else {
-		conf->mode = TEXT_MODE;
-	}
-
-	char *query_string = getenv("QUERY_STRING");
-	if (conf->mode == HTTP_MODE) {
-		if (cgi_parse(query_string, conf) == 1) {
-			print_html_headers();
-			printf("wrong a http request: %s\n", query_string);
-			print_html_footer();
-			return 1;
-		}
-	}
-
-	struct reportq *reports = NULL;
 	struct tailq_report *report = NULL;
 	if (S_ISREG(path_st.st_mode)) {
-		if (name != NULL) {
-			fprintf(stderr, "testcase metrics not supported for single report\n");
-			return 1;
-		}
-		if (check_sqlite(path) == 0) {
-			conf->source = SOURCE_SQLITE;
-			reports = process_db(path);
-		} else {
-			conf->source = SOURCE_FILE;
-			report = process_file(path);
-		}
-	} else if (S_ISDIR(path_st.st_mode)) {
-		conf->source = SOURCE_DIR;
-		reports = process_dir(path);
+		report = process_file(path);
+		print_report(report);
 	} else {
-		fprintf(stderr, "unsupported source type");
-		return 1;
+		fprintf(stderr, "Unsupported backend");
 	}
-
-	if (conf->mode == HTTP_MODE) {
-		if (strcmp(conf->cgi_action, "/") == 0) {
-			print_html_headers();
-			print_html_reports(reports);
-			print_html_footer();
-			free_reports(reports);
-			return 0;
-		} else if (strcmp(conf->cgi_action, "show") == 0) {
-			if ((report = is_report_exists(reports, conf->cgi_args)) != NULL) {
-				print_html_headers();
-				print_html_report(report);
-				print_html_footer();
-			} else {
-				print_html_headers();
-				printf("report not found\n");
-				print_html_footer();
-			}
-			free_report(report);
-			return 0;
-		} else if (strcmp(conf->cgi_action, "q") == 0) {
-			struct reportq *filtered = NULL;
-			filtered = filter_reports(reports, conf->cgi_args);
-			print_html_headers();
-			print_html_reports(filtered);
-			print_html_footer();
-			free_reports(reports);
-			free_reports(filtered);
-			return 0;
-		} else {
-			print_html_headers();
-			printf("unknown action\n");
-			print_html_footer();
-		}
-	}
-
-	if (conf->mode == TEXT_MODE) {
-		if (conf->source == SOURCE_DIR) {
-			if (name != NULL) {
-				printf("Tescase Name: %s\n", name);
-				printf("Average Percentage of Fault Detected (APFD): %d%%\n",
-						metric_apfd(reports, name));
-				printf("Average Execution Time: %f\n", metric_tc_avg_time(reports, name));
-				free_reports(reports);
-				return 0;
-			}
-			print_reports(reports);
-			free_reports(reports);
-			return 0;
-		} else if (conf->source == SOURCE_FILE) {
-			print_report(report);
-			free_report(report);
-			return 0;
-		} else {
-			fprintf(stderr, "unknown source");
-			return 1;
-		}
-	}
-
+	free_report(report);
+	free(path);
 	return 0;
 }
