@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018-2019 Sergey Bronnikov
+ * Copyright © 2018-2020 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,13 +85,12 @@ main(int argc, char *argv[])
 	}
 
 	struct tailq_report *report = NULL;
-	if (S_ISREG(path_st.st_mode)) {
-		report = process_file(path);
+	if (S_ISREG(path_st.st_mode) && (report = process_file(path))) {
 		print_report(report);
+		free_report(report);
+		free(path);
 	} else {
-		fprintf(stderr, "Unsupported backend");
+		fprintf(stderr, "Unsupported file format");
 	}
-	free_report(report);
-	free(path);
 	return 0;
 }
