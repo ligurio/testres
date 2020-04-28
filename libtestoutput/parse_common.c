@@ -311,7 +311,7 @@ enum test_status_class class_by_status(enum test_status status) {
 }
 
 struct reportq*
-process_dir(char *path) {
+process_dir(const char *path) {
 
 	DIR *d;
 	int fd;
@@ -368,7 +368,7 @@ process_dir(char *path) {
 }
 
 struct reportq*
-process_db(char *path)
+process_db(const char *path)
 {
 	/* not implemented */
 	return NULL;
