@@ -24,3 +24,23 @@ foreach(test ${${MODULE_PREFIX}_TESTS})
 	get_filename_component(TestName ${test} NAME_WE)
 	add_test(${TestName} ${TESTING_OUTPUT_DIRECTORY}/${MODULE_NAME} ${TestName})
 endforeach()
+
+macro (make_fuzzer name)
+    add_executable(${name} ${name}.c)
+    set_target_properties(${name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer" LINK_FLAGS "-fsanitize=fuzzer")
+    target_link_libraries(${name} PRIVATE testoutput)
+endmacro ()
+
+set(${MODULE_PREFIX}_FUZZERS
+		FuzzParseJUnit
+		FuzzParseSubunitV1
+		FuzzParseSubunitV2
+		FuzzParseTestanything)
+
+if(NOT CMAKE_HOST_SYSTEM_NAME MATCHES "OpenBSD")
+foreach(fuzzer ${${MODULE_PREFIX}_FUZZERS})
+	make_fuzzer(${fuzzer})
+	get_filename_component(TestName ${fuzzer} NAME_WE)
+	add_test(${TestName} ${TESTING_OUTPUT_DIRECTORY}/${MODULE_NAME} ${TestName})
+endforeach()
+endif()
