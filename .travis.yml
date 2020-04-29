@@ -12,5 +12,5 @@ addons:
 
 script:
   - cmake --version
-  - cmake CMakeLists.txt
-  - cmake --build .
+  - mkdir build && cd build && cmake -DBUILD_TESTING=ON -DENABLE_FUZZER=ON ..
+  - make -j
