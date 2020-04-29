@@ -37,7 +37,7 @@ set(${MODULE_PREFIX}_FUZZERS
 		FuzzParseSubunitV2
 		FuzzParseTestanything)
 
-if(NOT CMAKE_HOST_SYSTEM_NAME MATCHES "OpenBSD")
+if(NOT CMAKE_HOST_SYSTEM_NAME MATCHES "OpenBSD" AND CMAKE_C_COMPILER_ID STREQUAL "Clang")
 foreach(fuzzer ${${MODULE_PREFIX}_FUZZERS})
 	make_fuzzer(${fuzzer})
 	get_filename_component(TestName ${fuzzer} NAME_WE)
