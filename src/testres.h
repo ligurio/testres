@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 Sergey Bronnikov
+ * Copyright © 2019-2020 Sergey Bronnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,9 @@
 #ifndef TESTRES_H
 #define TESTRES_H
 
-#define	SCRIPT_NAME "testres.cgi"
-#define	STYLESHEET "testres.css"
-#define	VERSION "0.1.0"
-#define	SLOWEST_THRESHOLD 5
+#define SCRIPT_NAME "cgi-bin/testres.cgi"
+#define STYLESHEET "/testres.css"
+#define VERSION "0.1.0"
+#define SLOWEST_THRESHOLD 5
 
-#endif				/* TESTRES_H */
+#endif	/* TESTRES_H */

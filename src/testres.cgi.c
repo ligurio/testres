@@ -40,39 +40,22 @@ struct config {
 
 typedef struct config config;
 
-int cgi_parse(char *query_string, struct config *conf);
+void  cgi_parse(char *query_string, struct config *conf);
 
-int cgi_parse(char *query_string, struct config *conf) {
-	if (query_string == NULL) {
-		conf->cgi_action = (char*)"/";
-		return 0;
-	}
+void cgi_parse(char *query_string, struct config *conf) {
+	conf->cgi_action = NULL;
+	conf->cgi_args = NULL;
 	conf->cgi_action = strtok(query_string, "=");
-	conf->cgi_args = strtok(NULL, "=");
-	if (conf->cgi_action == NULL) {
-		return 1;
-	}
-	return 0;
+	if (conf->cgi_action)
+		conf->cgi_args = strtok(NULL, "=");
 }
 
 int main(void) {
-	print_html_headers();
-	printf("Hello!\n");
-	print_html_footer();
-
 	config *conf = calloc(1, sizeof(config));
-	if (conf == NULL) {
-		perror("calloc");
-		return 1;
-	}
-
-	char *query_string = getenv("QUERY_STRING");
-	if (!cgi_parse(query_string, conf)) {
+	if (!conf) {
 		print_html_headers();
-		printf("wrong a http request: %s\n", query_string);
+		printf("calloc\n");
 		print_html_footer();
-		free(query_string);
-		free(conf);
 		return 1;
 	}
 
@@ -81,41 +64,33 @@ int main(void) {
 		print_html_headers();
 		printf("no reports found\n");
 		print_html_footer();
-		return 0;
+		return 1;
 	}
-	if (strcmp(conf->cgi_action, "/") == 0) {
-		print_html_headers();
+
+	char *query_string = getenv("QUERY_STRING");
+	cgi_parse(query_string, conf);
+
+	print_html_headers();
+	if (!(conf->cgi_action && conf->cgi_args)) {
 		print_html_reports(reports);
-		print_html_footer();
-		free(conf);
-		free_reports(reports);
-		return 0;
-	} else if (strcmp(conf->cgi_action, "show")) {
-		tailq_report *report;
-		if ((report = is_report_exists(reports, conf->cgi_args)) != NULL) {
-			print_html_headers();
-			print_html_report(report);
-			print_html_footer();
-		} else {
-			print_html_headers();
-			printf("report not found\n");
-			print_html_footer();
-		}
-		free_report(report);
-		return 0;
-	} else if (strcmp(conf->cgi_action, "q") == 0) {
-		struct reportq *filtered = NULL;
-		filtered = filter_reports(reports, conf->cgi_args);
-		print_html_headers();
-		print_html_reports(filtered);
-		print_html_footer();
-		free_reports(reports);
-		free_reports(filtered);
-		return 0;
 	} else {
-		print_html_headers();
-		printf("unknown action\n");
-		print_html_footer();
+		if (!strcmp(conf->cgi_action, "show")) {
+			tailq_report *report;
+			if ((report = is_report_exists(reports, conf->cgi_args))) {
+				print_html_report(report);
+				free_report(report);
+			}
+		} else if (!strcmp(conf->cgi_action, "q")) {
+			struct reportq *filtered = NULL;
+			filtered = filter_reports(reports, conf->cgi_args);
+			print_html_reports(filtered);
+			free_reports(filtered);
+		} else {
+			print_html_reports(reports);
+		}
 	}
+	print_html_footer();
+	free(conf);
+	free_reports(reports);
 	return 0;
 }
