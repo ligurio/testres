@@ -12,8 +12,12 @@ find_package(EXPAT REQUIRED)
 
 include_directories(${EXPAT_INCLUDE_DIRS} "../libtestoutput")
 
+set(LIBS testoutput m ${EXPAT_LIBRARIES})
 add_executable(${PROJECT_NAME} testres.c ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} testoutput ${EXPAT_LIBRARIES} m)
+target_link_libraries(${PROJECT_NAME} ${LIBS})
 
+if(ENABLE_STATIC_BUILD)
+    set(LIBS ${LIBS} -static)
+endif()
 add_executable(${PROJECT_NAME}.cgi testres.cgi.c ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME}.cgi testoutput ${EXPAT_LIBRARIES} m)
+target_link_libraries(${PROJECT_NAME}.cgi ${LIBS})

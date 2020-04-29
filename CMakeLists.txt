@@ -16,6 +16,7 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O0 -g")
 include(CTest)
 
 option(ENABLE_FUZZER "Enable fuzzing testing" OFF)
+option(ENABLE_STATIC_BUILD "Enable static build" OFF)
 
 if(BUILD_TESTING)
         enable_testing()
