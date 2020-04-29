@@ -35,8 +35,6 @@
 #include <parse_common.h>
 #include "parse_testanything.tab.h"
 
-#define YYDEBUG 1
-
 struct suiteq *parse_testanything(FILE *f);
 void yyerror(const char *);
 int yylex(void);
@@ -245,7 +243,7 @@ void yyerror(const char *s)
 struct suiteq *parse_testanything(FILE *f) {
 
   if (f == NULL) {
-	return NULL;
+    return NULL;
   }
 
   is_bailout = false;
