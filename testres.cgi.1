@@ -15,52 +15,31 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .Dd $Mdocdate: April 29 2020 $
-.Dt TESTRES 1
+.Dt TESTRES.CGI 1
 .Os
 .Sh NAME
-.Nm testres
-.Nd console viewer for software testing results.
+.Nm testres.cgi
+.Nd hyperfast web viewer for software testing results
 .Sh SYNOPSIS
 .Nm
-.Op Fl s Ar file
-.Op Fl v
-.Op Fl h
 .Sh DESCRIPTION
 The
 .Nm
 utility knits together software testing reports and helps analyze them.
 .Nm
-is able to process software testing reports in a three different formats:
-JUnit, SubUnit (versions 1 and 2) and Test Anything Protocol.
-.Pp
-The options are as follows:
-.Bl -tag
-.It Fl s
-Specify a path to a file with report.
-.It Fl v
-Print version.
-.It Fl h
-Print usage.
+is able to process software testing reports in a three formats: JUnit, SubUnit
+(versions 1 and 2) and Test Anything Protocol.
+It is intended to be used in a
+.Xr chroot 2
+environment in
+.Pa /var/www .
+.Sh FILES
+.Bl -tag -width "/var/www/conf/testres.css" -compact
+.It Pa /var/www/conf/testres.css
+CSS style sheet.
 .El
 .Sh EXIT STATUS
 .Ex -std
-.Sh EXAMPLES
-.Bd -literal
-
-$ testres -s subunit_v1.subunit
-
-TEST REPORT (SUBUNIT_V1)
-ID: b09b24ebda9e4725552bf89f9afdd9d04ab1cab
-CREATED ON: Thu Jan  1 03:00:00 1970
-FILE: subunit_v1.subunit
-
-SUITE: noname
-        PASS test_add.TestAdd.test_add_control_dir(pre-views)
-        PASS test_add.TestAdd.test_add_control_dir(view-aware)
-        PASS test_add.TestAdd.test_add_dry_run(pre-views)
-        PASS test_add.TestAdd.test_add_dry_run(view-aware)
-
-.Ed
 .Sh STANDARDS
 .Rs
 .%A M. G. Schwern, A. Lester, A. Armstrong
@@ -70,13 +49,18 @@ SUITE: noname
 .Pp
 .Rs
 .%A R. Collins
-.%D 2005
+.%D 2009
 .%T SubUnit: A streaming protocol for test results
 .Re
 .Pp
 .Rs
+.%A D. Robinson, K. Coar
+.%D October 2004
+.%R RFC 3875
+.%T The Common Gateway Interface (CGI) Version 1.1
+.Re
 .Sh SEE ALSO
-.Xr testres.cgi 1 ,
+.Xr testres 1 ,
 .Xr httpd 8 ,
 .Xr slowcgi 8
 .Sh AUTHORS
@@ -85,9 +69,3 @@ The
 .Nm
 utility was written by
 .An Sergey Bronnikov
-.Sh CAVEATS
-Supported formats uses different names and types of test statuses.
-For simplification
-.Nm
-limits range of statuses with PASS, FAIL and SKIP statuses only. These
-statuses aggregates other appropriate statuses.
