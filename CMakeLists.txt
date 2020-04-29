@@ -15,6 +15,8 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O0 -g")
 
 include(CTest)
 
+option(ENABLE_FUZZER "Enable fuzzing testing" OFF)
+
 if(BUILD_TESTING)
         enable_testing()
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-function -Wno-unused-variable")
