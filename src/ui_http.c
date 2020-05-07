@@ -81,7 +81,7 @@ print_html_reports(struct reportq * reports) {
     printf("<th>Report ID</th>\n");
     printf("<th>Success %%</th>\n");
     printf("<th>Status</th>\n");
-    /*printf("<th>Created On</th>\n");*/
+    printf("<th>Created On</th>\n");
     printf("</tr>\n");
     tailq_report *report_item = NULL;
 	time_t prev_time = {0};
@@ -145,7 +145,7 @@ print_html_suites(struct suiteq * suites) {
     printf("<tr>\n");
     printf("<th>Testcase</th>\n");
     printf("<th>Status</th>\n");
-    printf("<th>Time Duration</th>\n");
+    printf("<th>Duration</th>\n");
     printf("<th>Time</th>\n");
     printf("</tr>\n");
     TAILQ_FOREACH(suite_item, suites, entries) {
