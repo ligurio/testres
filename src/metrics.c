@@ -35,14 +35,14 @@
 /* FIXME: passed, failed and skipped calculated twice */
 double metric_pass_rate(struct tailq_report *report) {
 
-    if (!report)
-      return 0;
+    int passed = num_by_status_class(report, STATUS_CLASS_PASS);
+    int failed = num_by_status_class(report, STATUS_CLASS_FAIL);
+    int skipped = num_by_status_class(report, STATUS_CLASS_SKIP);
+    if (!report || (passed + failed + skipped == 0))
+       return 0;
 
     double num = 0;
     if (report->suites != NULL) {
-       int passed = num_by_status_class(report, STATUS_CLASS_PASS);
-       int failed = num_by_status_class(report, STATUS_CLASS_FAIL);
-       int skipped = num_by_status_class(report, STATUS_CLASS_SKIP);
        num = (double)passed / (double)(passed + failed + skipped) * 100;
     } else {
        num = 0;
