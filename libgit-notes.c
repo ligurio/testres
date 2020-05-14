@@ -15,6 +15,16 @@
  * git notes get-ref
  */
 
+typedef struct {
+  git_repository *repo;
+} ref_data;
+
+typedef struct {
+  git_repository *repo;
+  const char *notes_ref;
+} note_data;
+
+
 git_repository* open_repository(const char *path) {
   git_repository *repo = NULL;
   if (!(git_repository_open_ext(&repo, path, GIT_REPOSITORY_OPEN_NO_SEARCH, NULL) == 0)) {
@@ -32,12 +42,13 @@ git_repository* open_repository(const char *path) {
 }
 
 void print_notes() {
-  git_repository *r = open_repository(GIT_REPO);
   printf("print notes\n");
+  git_repository *r = open_repository(GIT_REPO);
   git_oid *annotated_id = NULL, *note_id = NULL;
   git_note_iterator *note_iter = NULL;
   int error = git_note_iterator_new(&note_iter, r, "refs/notes/commits");
-  git_note_next(note_id, annotated_id, note_iter);
+  printf("%p\n", note_iter);
+  // git_note_next(note_id, annotated_id, note_iter);
   git_note_iterator_free(note_iter);
   git_repository_free(r);
 }
@@ -46,9 +57,9 @@ void print_default_note_ref() {
   git_repository *r = open_repository(GIT_REPO);
   printf("print default note ref\n");
   git_buf *out;
-  git_note_default_ref(out, r);
+  //git_note_default_ref(out, r);
   printf("def note reference %s\n", out);
-  git_repository_free(r);
+  //git_repository_free(r);
 }
 
 void print_references() {
@@ -70,7 +81,7 @@ void print_references() {
   git_repository_free(r);
 }
 
-static int show_note_cb(const git_oid *blob_id, const git_oid *annotated_obj_id, void *payload)
+static int each_note_cb(const git_oid *blob_id, const git_oid *annotated_obj_id, void *note_data)
 {
   /*
   char buf[40];
@@ -81,7 +92,7 @@ static int show_note_cb(const git_oid *blob_id, const git_oid *annotated_obj_id,
   printf("%s\n", buf);
   */
 
-  git_repository *repo = (git_repository*)payload;
+  git_repository *repo = (git_repository*)note_data;
   git_note *git_note;
   int rc = git_note_read(&git_note, repo, DEFAULT_NOTES_REF, annotated_obj_id);
   if (rc != 0) {
@@ -99,10 +110,15 @@ static int show_note_cb(const git_oid *blob_id, const git_oid *annotated_obj_id,
   return 0;
 }
 
-struct payload {
-  git_repository *repo;
-  const char *notes_ref;
-};
+int each_ref_cb(git_reference *ref, void *note_data)
+{
+  ref_data *d = (ref_data*)note_data;
+  if (git_reference_is_note(ref)) {
+    printf("Hello!\n");
+  }
+  const char *name = git_reference_name(ref);
+  printf("NAME: %s\n", name);
+}
 
 int main (int argc, char** argv)
 {
@@ -110,10 +126,21 @@ int main (int argc, char** argv)
   /* examples */
   print_references();
   git_repository *r = open_repository(GIT_REPO);
-  git_note_foreach(r, DEFAULT_NOTES_REF, show_note_cb, r);
+  git_note_foreach(r, DEFAULT_NOTES_REF, each_note_cb, r);
   git_repository_free(r);
-  //print_default_note_ref();	// FIXME
-  //print_notes();		// FIXME
+  print_default_note_ref();
+  print_notes();
+
+  ref_data d = {0};
+  r = open_repository(GIT_REPO);
+  int rc = git_reference_foreach(r, each_ref_cb, &d);
+/*
+  if (rc) {
+    const git_error *e = giterr_last();
+    printf("Error %d/%d: %s\n", rc, e->klass, e->message);
+    return -1;
+  }
+*/
 
   git_libgit2_shutdown();
 }
